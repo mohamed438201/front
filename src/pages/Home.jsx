@@ -1121,6 +1121,8 @@ export default function App() {
               <div className="government-badge pulse" role="region" aria-label="بيان رسمي">
                 <i className="fas fa-star me-2"></i>
                 منصة رسمية تابعة للحكومة المصرية
+                منصة رسمية تابعة للحكومة المصرية
+
               </div>
             </div>
           </section>
