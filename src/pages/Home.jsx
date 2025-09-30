@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-
 const appStyles = `
   @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap');
   @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css');
@@ -827,7 +826,6 @@ const appStyles = `
     background: linear-gradient(135deg, #ffcd39, var(--warning-color));
   }
 `;
-
 const AiSearchResultsPage = ({ query, result, onBack, isSearching }) => {
   if (isSearching) {
     return (
@@ -837,7 +835,7 @@ const AiSearchResultsPage = ({ query, result, onBack, isSearching }) => {
             <div className="col-lg-10">
               <div className="searching-state">
                 <div className="spinner-border text-primary" role="status">
-                  <span className="visually-hidden">جارى التحقق...</span>
+                  <span className="visually-hidden">جارٍ التحقق...</span>
                 </div>
                 <h3>جاري تحليل طلبك...</h3>
                 <p>يستخدم الذكاء الاصطناعي لفهم سؤالك والبحث في قاعدة البيانات لتقديم إجابة دقيقة.</p>
@@ -871,7 +869,7 @@ const AiSearchResultsPage = ({ query, result, onBack, isSearching }) => {
                 {result.source === 'ai' && (
                   <div className="ai-source-warning">
                     <i className="fas fa-exclamation-triangle me-2"></i>
-                    <strong>تنبيه:</strong> هذه المعلومات من الذكاء الاصطناعي وقد تحتمل الخطأ.
+                    <strong>تنبيه:</strong> هذه المعلومات من الذكاء الاصطناعي وقد تحتوي الخطأ.
                   </div>
                 )}
                 {result.source === 'database' && result.references && Object.keys(result.references).length > 0 && (
@@ -905,7 +903,6 @@ const AiSearchResultsPage = ({ query, result, onBack, isSearching }) => {
     </main>
   );
 };
-
 const CustomAlert = ({ message, show }) => {
   return (
     <div className={`custom-alert ${show ? 'show' : ''}`} role="alert">
@@ -914,7 +911,6 @@ const CustomAlert = ({ message, show }) => {
     </div>
   );
 };
-
 export default function App() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState('home');
@@ -924,17 +920,14 @@ export default function App() {
   const [alert, setAlert] = useState({ show: false, message: '' });
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const headerRef = useRef(null);
-
   useEffect(() => {
     const fontAwesomeLink = document.createElement('link');
     fontAwesomeLink.rel = 'stylesheet';
     fontAwesomeLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css';
     document.head.appendChild(fontAwesomeLink);
-
     const timer = setTimeout(() => setLoading(false), 2500);
     return () => clearTimeout(timer);
   }, []);
-
   useEffect(() => {
     let lastScrollY = window.scrollY;
     const header = document.getElementById("mainHeader");
@@ -952,46 +945,43 @@ export default function App() {
       }
       lastScrollY = window.scrollY;
     };
-
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
   const showAlert = (message) => {
     setAlert({ show: true, message });
     setTimeout(() => setAlert({ show: false, message: '' }), 4500);
   };
-
-  // --- دالة البحث المعدلة لحل جميع المشاكل ---
-const handleSearch = async (e) => {
-  e.preventDefault();
-  if (!query.trim() || isSearching) return;
-  setIsSearching(true);
-  setPage('results');
-  try {
-const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
-const contentType = response.headers.get("content-type");
-    if (!contentType || !contentType.includes("application/json")) {
-      throw new Error("Invalid response format. Expected JSON.");
+  // --- دالة البحث المعدّلة لحل مشكلة CORS ---
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    if (!query.trim() || isSearching) return;
+    setIsSearching(true);
+    setPage('results');
+    try {
+      // ✅ استخدام المسار النسبي الذي سيُعاد توجيهه عبر vercel.json
+      const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Invalid response format. Expected JSON.");
+      }
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      if (data.source === 'ai') {
+        setAiSearchResult({ answer: null, source: 'not_found', references: [] });
+      } else {
+        setAiSearchResult(data);
+      }
+    } catch (error) {
+      console.error('Error fetching data from API:', error);
+      showAlert('حدث خطأ أثناء الاتصال بالخادم. يرجى المحاولة لاحقًا.');
+      setAiSearchResult({ answer: null, source: 'error', references: [] });
+    } finally {
+      setIsSearching(false);
     }
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const data = await response.json();
-    if (data.source === 'ai') {
-      setAiSearchResult({ answer: null, source: 'not_found', references: [] });
-    } else {
-      setAiSearchResult(data);
-    }
-  } catch (error) {
-    console.error('Error fetching data from API:', error);
-    showAlert('حدث خطأ أثناء الاتصال بالخادم. يرجى المحاولة لاحقًا.');
-    setAiSearchResult({ answer: null, source: 'error', references: [] });
-  } finally {
-    setIsSearching(false);
-  }
-};
-
+  };
   useEffect(() => {
     const handleScrollAnimations = () => {
       const elements = document.querySelectorAll('.feature-card, .stat-card, .step-card');
@@ -1002,23 +992,19 @@ const contentType = response.headers.get("content-type");
         }
       });
     };
-
     window.addEventListener('scroll', handleScrollAnimations);
     handleScrollAnimations(); 
     return () => window.removeEventListener('scroll', handleScrollAnimations);
   }, [page]);
-
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (isMenuOpen && !event.target.closest('.navbar')) {
         setIsMenuOpen(false);
       }
     };
-
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
   }, [isMenuOpen]);
-
   if (loading) {
     return (
       <div id="loading-screen" role="status" aria-live="polite" aria-label="شاشة تحميل محتمى الصفحة">
@@ -1060,7 +1046,6 @@ const contentType = response.headers.get("content-type");
       </div>
     );
   }
-
   return (
     <div dir="rtl" style={{ backgroundColor: "var(--light-bg-color)", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       <style>{appStyles}</style>
@@ -1097,7 +1082,6 @@ const contentType = response.headers.get("content-type");
           </div>
         </nav>
       </header>
-
       <div className={`page-transition ${page === 'home' ? 'active' : ''}`} style={{ flex: 1, display: page === 'home' ? 'block' : 'none' }}>
         <main>
           <section className="hero-section" id="home" aria-labelledby="hero-title">
@@ -1114,7 +1098,6 @@ const contentType = response.headers.get("content-type");
               </div>
             </div>
           </section>
-
           <section className="container" aria-labelledby="search-heading">
             <div className="search-container shadow-xl">
               <div className="text-center mb-5">
@@ -1166,7 +1149,6 @@ const contentType = response.headers.get("content-type");
               </div>
             </div>
           </section>
-
           <section className="section-padding" id="features" aria-labelledby="features-heading">
             <div className="container">
               <div className="text-center mb-5">
@@ -1185,7 +1167,7 @@ const contentType = response.headers.get("content-type");
                   <div className="feature-card rounded-lg h-100">
                     <div className="feature-icon"><i className="fas fa-bolt"></i></div>
                     <h4 className="fw-bold">سرعة فائقة</h4>
-                    <p className="text-muted mt-3">نتائج فورية خلال ثوان مع تحليل شامل للمحتوى ومساءل المعلومات</p>
+                    <p className="text-muted mt-3">نتائج فورية خلال ثوان مع تحليل شامل للمحتوى ومسائل المعلومات</p>
                   </div>
                 </div>
                 <div className="col-md-4">
@@ -1198,7 +1180,6 @@ const contentType = response.headers.get("content-type");
               </div>
             </div>
           </section>
-
           <section className="stats-section section-padding-sm" id="about" aria-labelledby="stats-heading">
             <div className="container">
               <div className="text-center mb-5">
@@ -1233,7 +1214,6 @@ const contentType = response.headers.get("content-type");
               </div>
             </div>
           </section>
-
           <section className="section-padding bg-white" aria-labelledby="how-it-works-heading">
             <div className="container">
               <div className="text-center mb-5">
@@ -1259,13 +1239,12 @@ const contentType = response.headers.get("content-type");
                   <div className="step-3">
                     <div className="step-icon">3</div>
                   </div>
-                  <h4 className="mt-4 fw-bold">النتيجة الفورىة</h4>
+                  <h4 className="mt-4 fw-bold">النتيجة الفورية</h4>
                   <p className="text-muted mt-3">احصل على تقرير مفصل حول مدى صحة الخبر مع التوضيحات اللازمة</p>
                 </div>
               </div>
             </div>
           </section>
-
           <section className="section-padding bg-light" id="contact" aria-labelledby="contact-heading">
             <div className="container">
               <div className="text-center mb-5">
@@ -1299,7 +1278,6 @@ const contentType = response.headers.get("content-type");
           </section>
         </main>
       </div>
-
       <div className={`page-transition ${page === 'results' ? 'active' : ''}`} style={{ display: page === 'results' ? 'block' : 'none' }}>
         <AiSearchResultsPage 
           query={query} 
@@ -1308,7 +1286,6 @@ const contentType = response.headers.get("content-type");
           isSearching={isSearching}
         />
       </div>
-
       <footer className="footer mt-auto" role="contentinfo">
         <div className="footer-wave"></div>
         <div className="container">
