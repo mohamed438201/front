@@ -963,44 +963,34 @@ export default function App() {
   };
 
   // --- دالة البحث المعدلة لحل جميع المشاكل ---
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    if (!query.trim() || isSearching) return;
-
-    setIsSearching(true);
-    setPage('results');
-
-    try {
-      // ⚠️ نستخدم المسار النسبي /api/search
-      // ⚠️ سيتم إعادة توجيهه تلقائيًا إلى http://127.0.0.1:8000/api/search عبر setupProxy.js
-      const response = await fetch(`mohamedsherif-sadq.syria-cloud.info/back/public/api/search?q=${encodeURIComponent(query)}`);
-      
-      // --- التحقق من أن الاستجابة هي JSON ---
-      const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        throw new Error("Invalid response format. Expected JSON.");
-      }
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-
-      if (data.source === 'ai') {
-        setAiSearchResult({ answer: null, source: 'not_found', references: [] });
-      } else {
-        setAiSearchResult(data);
-      }
-    } catch (error) {
-      console.error('Error fetching data from API:', error);
-      // عرض رسالة خطأ واضحة
-      showAlert('api error');
-      setAiSearchResult({ answer: null, source: 'error', references: [] });
-    } finally {
-      setIsSearching(false);
+const handleSearch = async (e) => {
+  e.preventDefault();
+  if (!query.trim() || isSearching) return;
+  setIsSearching(true);
+  setPage('results');
+  try {
+    const response = await fetch(`https://mohamedsherif-sadq.syria-cloud.info/back/public/api/search?q=${encodeURIComponent(query)}`);
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      throw new Error("Invalid response format. Expected JSON.");
     }
-  };
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    if (data.source === 'ai') {
+      setAiSearchResult({ answer: null, source: 'not_found', references: [] });
+    } else {
+      setAiSearchResult(data);
+    }
+  } catch (error) {
+    console.error('Error fetching data from API:', error);
+    showAlert('حدث خطأ أثناء الاتصال بالخادم. يرجى المحاولة لاحقًا.');
+    setAiSearchResult({ answer: null, source: 'error', references: [] });
+  } finally {
+    setIsSearching(false);
+  }
+};
 
   useEffect(() => {
     const handleScrollAnimations = () => {
