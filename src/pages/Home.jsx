@@ -973,7 +973,7 @@ export default function App() {
     try {
       // ⚠️ نستخدم المسار النسبي /api/search
       // ⚠️ سيتم إعادة توجيهه تلقائيًا إلى http://127.0.0.1:8000/api/search عبر setupProxy.js
-      const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+      const response = await fetch(`mohamedsherif-sadq.syria-cloud.info/back/public/api/search?q=${encodeURIComponent(query)}`);
       
       // --- التحقق من أن الاستجابة هي JSON ---
       const contentType = response.headers.get("content-type");
