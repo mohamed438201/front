@@ -969,8 +969,8 @@ const handleSearch = async (e) => {
   setIsSearching(true);
   setPage('results');
   try {
-    const response = await fetch(`https://mohamedsherif-sadq.syria-cloud.info/back/public/api/search?q=${encodeURIComponent(query)}`);
-    const contentType = response.headers.get("content-type");
+const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+const contentType = response.headers.get("content-type");
     if (!contentType || !contentType.includes("application/json")) {
       throw new Error("Invalid response format. Expected JSON.");
     }
