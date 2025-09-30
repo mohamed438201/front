@@ -995,7 +995,7 @@ export default function App() {
     } catch (error) {
       console.error('Error fetching data from API:', error);
       // عرض رسالة خطأ واضحة
-      showAlert('❌ فشل الاتصال بالخادم. يرجى التأكد من: 1. تشغيل خادم الـ API على http://127.0.0.1:8000 2. وجود ملف setupProxy.js في مجلد src 3. إعادة تشغيل npm start');
+      showAlert('api error');
       setAiSearchResult({ answer: null, source: 'error', references: [] });
     } finally {
       setIsSearching(false);
