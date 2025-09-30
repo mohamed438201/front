@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://mohamedsherif-sadq.syria-cloud.info/back/public/api/:path*"
+    }
+  ]
+}
