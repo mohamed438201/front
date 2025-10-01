@@ -952,37 +952,37 @@ export default function App() {
     setAlert({ show: true, message });
     setTimeout(() => setAlert({ show: false, message: '' }), 4500);
   };
-  // --- دالة البحث المعدّلة لحل مشكلة CORS ---
- const handleSearch = async (e) => {
-    e.preventDefault();
-    if (!query.trim() || isSearching) return;
-    setIsSearching(true);
-    setPage('results');
-    try {
-      // ⚠️ استخدام خدمة وسيطة لتجنب CORS (للتجربة فقط)
-   const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
-      const response = await fetch(proxyUrl + targetUrl);
-      const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        throw new Error("Invalid response format. Expected JSON.");
-      }
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      if (data.source === 'ai') {
-        setAiSearchResult({ answer: null, source: 'not_found', references: [] });
-      } else {
-        setAiSearchResult(data);
-      }
-    } catch (error) {
-      console.error('Error fetching data from API:', error);
-      showAlert('حدث خطأ أثناء الاتصال بالخادم. يرجى المحاولة لاحقًا.');
-      setAiSearchResult({ answer: null, source: 'error', references: [] });
-    } finally {
-      setIsSearching(false);
+  // --- search by mohamed sherif ---
+const handleSearch = async (e) => {
+  e.preventDefault();
+  if (!query.trim() || isSearching) return;
+  setIsSearching(true);
+  setPage('results');
+  try {
+    
+    const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+    
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      throw new Error("Invalid response format. Expected JSON.");
     }
-  };
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    if (data.source === 'ai') {
+      setAiSearchResult({ answer: null, source: 'not_found', references: [] });
+    } else {
+      setAiSearchResult(data);
+    }
+  } catch (error) {
+    console.error('Error fetching data from API:', error);
+    showAlert('حدث خطأ أثناء الاتصال بالخادم. يرجى المحاولة لاحقًا.');
+    setAiSearchResult({ answer: null, source: 'error', references: [] });
+  } finally {
+    setIsSearching(false);
+  }
+};
   useEffect(() => {
     const handleScrollAnimations = () => {
       const elements = document.querySelectorAll('.feature-card, .stat-card, .step-card');
