@@ -960,9 +960,7 @@ export default function App() {
     setPage('results');
     try {
       // ⚠️ استخدام خدمة وسيطة لتجنب CORS (للتجربة فقط)
-      const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-      const targetUrl = `https://mohamedsherif-sadq.syria-cloud.info/back/public/api/search?q=${encodeURIComponent(query)}`;
-      
+   const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
       const response = await fetch(proxyUrl + targetUrl);
       const contentType = response.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
