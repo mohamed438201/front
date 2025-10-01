@@ -953,14 +953,17 @@ export default function App() {
     setTimeout(() => setAlert({ show: false, message: '' }), 4500);
   };
   // --- دالة البحث المعدّلة لحل مشكلة CORS ---
-  const handleSearch = async (e) => {
+ const handleSearch = async (e) => {
     e.preventDefault();
     if (!query.trim() || isSearching) return;
     setIsSearching(true);
     setPage('results');
     try {
-      // ✅ استخدام المسار النسبي الذي سيُعاد توجيهه عبر vercel.json
-      const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+      // ⚠️ استخدام خدمة وسيطة لتجنب CORS (للتجربة فقط)
+      const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+      const targetUrl = `https://mohamedsherif-sadq.syria-cloud.info/back/public/api/search?q=${encodeURIComponent(query)}`;
+      
+      const response = await fetch(proxyUrl + targetUrl);
       const contentType = response.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
         throw new Error("Invalid response format. Expected JSON.");
