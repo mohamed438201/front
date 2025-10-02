@@ -9,7 +9,6 @@ export default function AdminDashboard() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
-    
     const [loginData, setLoginData] = useState({ employee_id: '', password: '' });
     const [newEmployee, setNewEmployee] = useState({
         employee_id: '', name: '', department: '', position: '', email: '', phone: '', password: '', role: 'normal'
@@ -17,7 +16,6 @@ export default function AdminDashboard() {
     const [editEmployee, setEditEmployee] = useState({
         employee_id: '', name: '', department: '', position: '', email: '', phone: '', password: '', role: 'normal'
     });
-    
     const [employeesData, setEmployeesData] = useState([]);
     const [stats, setStats] = useState(null);
     const [recentLogs, setRecentLogs] = useState([]);
@@ -43,12 +41,10 @@ export default function AdminDashboard() {
         setIsLoading(true);
         setError('');
         setSuccess('');
-        
         try {
             const params = new URLSearchParams(loginData).toString();
             const response = await fetch(`${API_BASE}/sadik/login?${params}`);
             const data = await response.json();
-            
             if (data.success) {
                 localStorage.setItem('employee_data', JSON.stringify(data.employee));
                 setEmployeeData(data.employee);
@@ -57,9 +53,10 @@ export default function AdminDashboard() {
                 setSuccess(data.message);
                 loadDashboardData();
             } else {
-                setError(data.message);
+                setError(data.message || 'فشل تسجيل الدخول');
             }
         } catch (err) {
+            console.error("Login error:", err);
             setError('❌ خطأ في الاتصال بالخادم.');
         } finally {
             setIsLoading(false);
@@ -71,39 +68,220 @@ export default function AdminDashboard() {
         setIsLoggedIn(false);
         setEmployeeData(null);
         setCurrentView('login');
+        setLoginData({ employee_id: '', password: '' });
     };
 
     // ============ Dashboard Data ============
     const loadDashboardData = async () => {
+        setIsLoading(true);
         try {
-            const response = await fetch(`${API_BASE}/sadik/admin-dashboard`);
-            const data = await response.json();
-            setStats(data.stats || {});
-            setRecentLogs(data.logs || []);
+            const [statsResp, employeesResp, newsResp] = await Promise.all([
+                fetch(`${API_BASE}/sadik/admin-dashboard`),
+                fetch(`${API_BASE}/sadik/employees`),
+                fetch(`${API_BASE}/sadik/news`)
+            ]);
+            
+            const statsData = await statsResp.json();
+            const employeesData = await employeesResp.json();
+            const newsData = await newsResp.json();
+            
+            if (statsData.success) {
+                setStats(statsData.stats || {});
+                setRecentLogs(statsData.recent_logs || []);
+            }
+            if (employeesData.success) {
+                setEmployeesData(employeesData.employees || []);
+            }
+            if (newsData.success) {
+                setNewsData(newsData.news || []);
+            }
         } catch (err) {
-            console.error("Error loading dashboard:", err);
+            console.error("Error loading dashboard ", err);
+            setError('❌ خطأ في تحميل بيانات لوحة التحكم');
+        } finally {
+            setIsLoading(false);
         }
     };
 
-    // ============ Employees ============
-    const loadEmployees = async () => {
+    // ============ Employees (GET only) ============
+    const addEmployee = async (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+        setError('');
+        setSuccess('');
         try {
-            const response = await fetch(`${API_BASE}/sadik/employees`);
+            const params = new URLSearchParams(newEmployee).toString();
+            const response = await fetch(`${API_BASE}/sadik/add-employee?${params}`);
             const data = await response.json();
-            setEmployeesData(data.employees || []);
+            if (data.success) {
+                setSuccess(data.message);
+                setNewEmployee({
+                    employee_id: '', name: '', department: '', position: '', email: '', phone: '', password: '', role: 'normal'
+                });
+                loadDashboardData();
+                setCurrentView('employees');
+            } else {
+                setError(data.message || 'فشل إضافة الموظف');
+            }
         } catch (err) {
-            console.error("Error loading employees:", err);
+            console.error("Add employee error:", err);
+            setError('❌ خطأ في الاتصال بالخادم.');
+        } finally {
+            setIsLoading(false);
         }
     };
 
-    // ============ News ============
-    const loadNews = async () => {
+    const updateEmployee = async (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+        setError('');
+        setSuccess('');
         try {
-            const response = await fetch(`${API_BASE}/sadik/news`);
+            const params = new URLSearchParams(editEmployee).toString();
+            const response = await fetch(`${API_BASE}/sadik/update-employee?${params}`);
             const data = await response.json();
-            setNewsData(data.news || []);
+            if (data.success) {
+                setSuccess(data.message);
+                loadDashboardData();
+                setCurrentView('employees');
+            } else {
+                setError(data.message || 'فشل تحديث الموظف');
+            }
         } catch (err) {
-            console.error("Error loading news:", err);
+            console.error("Update employee error:", err);
+            setError('❌ خطأ في الاتصال بالخادم.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const deleteEmployee = async (employeeId) => {
+        if (!window.confirm('هل أنت متأكد من حذف هذا الموظف؟')) {
+            return;
+        }
+        setIsLoading(true);
+        setError('');
+        setSuccess('');
+        try {
+            const params = new URLSearchParams({ employee_id: employeeId }).toString();
+            const response = await fetch(`${API_BASE}/sadik/delete-employee?${params}`);
+            const data = await response.json();
+            if (data.success) {
+                setSuccess(data.message);
+                loadDashboardData();
+            } else {
+                setError(data.message || 'فشل حذف الموظف');
+            }
+        } catch (err) {
+            console.error("Delete employee error:", err);
+            setError('❌ خطأ في الاتصال بالخادم.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // ============ News (GET only) ============
+    const addNews = async (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+        setError('');
+        setSuccess('');
+        try {
+            const payload = { ...newNews, employee_id: employeeData?.employee_id || '' };
+            const params = new URLSearchParams(payload).toString();
+            const response = await fetch(`${API_BASE}/sadik/add-news?${params}`);
+            const data = await response.json();
+            if (data.success) {
+                setSuccess(data.message);
+                setNewNews({
+                    title: '', description: '', url: '', embedding: '', status: true, employee_id: ''
+                });
+                loadDashboardData();
+                setCurrentView('news');
+            } else {
+                setError(data.message || 'فشل إضافة الخبر');
+            }
+        } catch (err) {
+            console.error("Add news error:", err);
+            setError('❌ خطأ في الاتصال بالخادم.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const getNewsForEdit = async (newsId) => {
+        setIsLoading(true);
+        setError('');
+        try {
+            const response = await fetch(`${API_BASE}/sadik/news/${newsId}`);
+            const data = await response.json();
+            if (data.success) {
+                setEditNews({
+                    id: data.news.id,
+                    title: data.news.title,
+                    description: data.news.description,
+                    url: data.news.url || '',
+                    embedding: data.news.embedding || '',
+                    status: data.news.status,
+                    employee_id: data.news.employee_id
+                });
+            } else {
+                setError(data.message || 'لم يتم العثور على الخبر');
+            }
+        } catch (err) {
+            console.error("Get news for edit error:", err);
+            setError('❌ خطأ في الاتصال بالخادم.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const updateNews = async (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+        setError('');
+        setSuccess('');
+        try {
+            const params = new URLSearchParams(editNews).toString();
+            const response = await fetch(`${API_BASE}/sadik/update-news?${params}`);
+            const data = await response.json();
+            if (data.success) {
+                setSuccess(data.message);
+                loadDashboardData();
+                setCurrentView('news');
+            } else {
+                setError(data.message || 'فشل تحديث الخبر');
+            }
+        } catch (err) {
+            console.error("Update news error:", err);
+            setError('❌ خطأ في الاتصال بالخادم.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const deleteNews = async (newsId) => {
+        if (!window.confirm('هل أنت متأكد من حذف هذا الخبر؟')) {
+            return;
+        }
+        setIsLoading(true);
+        setError('');
+        setSuccess('');
+        try {
+            const params = new URLSearchParams({ id: newsId }).toString();
+            const response = await fetch(`${API_BASE}/sadik/delete-news?${params}`);
+            const data = await response.json();
+            if (data.success) {
+                setSuccess(data.message);
+                loadDashboardData();
+            } else {
+                setError(data.message || 'فشل حذف الخبر');
+            }
+        } catch (err) {
+            console.error("Delete news error:", err);
+            setError('❌ خطأ في الاتصال بالخادم.');
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -111,15 +289,18 @@ export default function AdminDashboard() {
     useEffect(() => {
         const stored = localStorage.getItem('employee_data');
         if (stored) {
-            setEmployeeData(JSON.parse(stored));
-            setIsLoggedIn(true);
-            setCurrentView('dashboard');
-            loadDashboardData();
-            loadEmployees();
-            loadNews();
+            try {
+                const parsed = JSON.parse(stored);
+                setEmployeeData(parsed);
+                setIsLoggedIn(true);
+                setCurrentView('dashboard');
+                loadDashboardData();
+            } catch (e) {
+                console.error("Invalid stored ", e);
+                localStorage.removeItem('employee_data');
+            }
         }
     }, []);
-
 
     if (isLoading) {
         return (
@@ -137,19 +318,16 @@ export default function AdminDashboard() {
             <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center p-4">
                 <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
                     <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">نظام صادق</h1>
-                    
                     {error && (
                         <div className="bg-red-100 border-r-4 border-red-500 text-red-700 p-4 mb-6 rounded">
                             <p className="font-medium">❌ {error}</p>
                         </div>
                     )}
-                    
                     {success && (
                         <div className="bg-green-100 border-r-4 border-green-500 text-green-700 p-4 mb-6 rounded">
                             <p className="font-medium">✅ {success}</p>
                         </div>
                     )}
-                    
                     <form onSubmit={login} className="space-y-6">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">رقم الموظف</label>
@@ -163,7 +341,6 @@ export default function AdminDashboard() {
                                 required
                             />
                         </div>
-                        
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">كلمة المرور</label>
                             <input
@@ -176,7 +353,6 @@ export default function AdminDashboard() {
                                 required
                             />
                         </div>
-                        
                         <button
                             type="submit"
                             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300"
@@ -205,7 +381,6 @@ export default function AdminDashboard() {
                     </div>
                 </div>
             </header>
-
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="flex">
                     {/* Sidebar */}
@@ -246,7 +421,6 @@ export default function AdminDashboard() {
                             </nav>
                         </div>
                     </div>
-
                     {/* Main Content */}
                     <div className="flex-1">
                         {error && (
@@ -254,18 +428,15 @@ export default function AdminDashboard() {
                                 <p className="font-medium">❌ {error}</p>
                             </div>
                         )}
-                        
                         {success && (
                             <div className="bg-green-100 border-r-4 border-green-500 text-green-700 p-4 mb-6 rounded">
                                 <p className="font-medium">✅ {success}</p>
                             </div>
                         )}
-
                         {/* Dashboard View */}
                         {currentView === 'dashboard' && (
                             <div className="space-y-6">
                                 <h2 className="text-2xl font-bold text-gray-800">لوحة التحكم</h2>
-                                
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <div className="bg-white rounded-lg shadow-sm p-6">
                                         <div className="flex items-center">
@@ -278,7 +449,6 @@ export default function AdminDashboard() {
                                             </div>
                                         </div>
                                     </div>
-                                    
                                     <div className="bg-white rounded-lg shadow-sm p-6">
                                         <div className="flex items-center">
                                             <div className="bg-green-100 p-3 rounded-full">
@@ -290,7 +460,6 @@ export default function AdminDashboard() {
                                             </div>
                                         </div>
                                     </div>
-                                    
                                     <div className="bg-white rounded-lg shadow-sm p-6">
                                         <div className="flex items-center">
                                             <div className="bg-purple-100 p-3 rounded-full">
@@ -303,7 +472,6 @@ export default function AdminDashboard() {
                                         </div>
                                     </div>
                                 </div>
-
                                 <div className="bg-white rounded-lg shadow-sm p-6">
                                     <h3 className="text-xl font-bold text-gray-800 mb-4">أحدث عمليات تسجيل الدخول</h3>
                                     <div className="space-y-4 max-h-96 overflow-y-auto">
@@ -334,7 +502,6 @@ export default function AdminDashboard() {
                                 </div>
                             </div>
                         )}
-
                         {/* Employees View */}
                         {currentView === 'employees' && (
                             <div className="space-y-6">
@@ -347,7 +514,6 @@ export default function AdminDashboard() {
                                         إضافة موظف
                                     </button>
                                 </div>
-                                
                                 <div className="bg-white rounded-lg shadow-sm overflow-hidden">
                                     <div className="overflow-x-auto">
                                         <table className="min-w-full divide-y divide-gray-200">
@@ -402,7 +568,6 @@ export default function AdminDashboard() {
                                 </div>
                             </div>
                         )}
-
                         {/* Add Employee View */}
                         {currentView === 'add-employee' && (
                             <div className="space-y-6">
@@ -415,7 +580,6 @@ export default function AdminDashboard() {
                                         رجوع
                                     </button>
                                 </div>
-                                
                                 <div className="bg-white rounded-lg shadow-sm p-6">
                                     <form onSubmit={addEmployee} className="space-y-6">
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -516,7 +680,6 @@ export default function AdminDashboard() {
                                                 </select>
                                             </div>
                                         </div>
-                                        
                                         <div className="pt-4">
                                             <button
                                                 type="submit"
@@ -529,7 +692,6 @@ export default function AdminDashboard() {
                                 </div>
                             </div>
                         )}
-
                         {/* Edit Employee View */}
                         {currentView === 'edit-employee' && (
                             <div className="space-y-6">
@@ -542,7 +704,6 @@ export default function AdminDashboard() {
                                         رجوع
                                     </button>
                                 </div>
-                                
                                 <div className="bg-white rounded-lg shadow-sm p-6">
                                     <form onSubmit={updateEmployee} className="space-y-6">
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -643,7 +804,6 @@ export default function AdminDashboard() {
                                                 </select>
                                             </div>
                                         </div>
-                                        
                                         <div className="flex space-x-4 space-x-reverse pt-4">
                                             <button
                                                 type="submit"
@@ -663,7 +823,6 @@ export default function AdminDashboard() {
                                 </div>
                             </div>
                         )}
-
                         {/* News View */}
                         {currentView === 'news' && (
                             <div className="space-y-6">
@@ -676,7 +835,6 @@ export default function AdminDashboard() {
                                         إضافة خبر
                                     </button>
                                 </div>
-                                
                                 <div className="bg-white rounded-lg shadow-sm overflow-hidden">
                                     <div className="overflow-x-auto">
                                         <table className="min-w-full divide-y divide-gray-200">
@@ -737,7 +895,6 @@ export default function AdminDashboard() {
                                 </div>
                             </div>
                         )}
-
                         {/* Add News View */}
                         {currentView === 'add-news' && (
                             <div className="space-y-6">
@@ -750,7 +907,6 @@ export default function AdminDashboard() {
                                         رجوع
                                     </button>
                                 </div>
-                                
                                 <div className="bg-white rounded-lg shadow-sm p-6">
                                     <form onSubmit={addNews} className="space-y-6">
                                         <div>
@@ -765,7 +921,6 @@ export default function AdminDashboard() {
                                                 required
                                             />
                                         </div>
-                                        
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-2">وصف الخبر</label>
                                             <textarea
@@ -778,7 +933,6 @@ export default function AdminDashboard() {
                                                 required
                                             ></textarea>
                                         </div>
-                                        
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-2">رقم الموظف</label>
                                             <input
@@ -791,7 +945,6 @@ export default function AdminDashboard() {
                                                 required
                                             />
                                         </div>
-                                        
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-2">رابط الخبر (اختياري)</label>
                                             <input
@@ -803,7 +956,6 @@ export default function AdminDashboard() {
                                                 placeholder="أدخل رابط الخبر"
                                             />
                                         </div>
-                                        
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-2">تضمين (اختياري)</label>
                                             <input
@@ -815,7 +967,6 @@ export default function AdminDashboard() {
                                                 placeholder="أدخل التضمين"
                                             />
                                         </div>
-                                        
                                         <div className="flex items-center">
                                             <input
                                                 type="checkbox"
@@ -827,7 +978,6 @@ export default function AdminDashboard() {
                                             />
                                             <label htmlFor="status" className="mr-2 text-sm font-medium text-gray-700">نشر الخبر مباشرة</label>
                                         </div>
-                                        
                                         <div className="pt-4">
                                             <button
                                                 type="submit"
@@ -840,7 +990,6 @@ export default function AdminDashboard() {
                                 </div>
                             </div>
                         )}
-
                         {/* Edit News View */}
                         {currentView === 'edit-news' && (
                             <div className="space-y-6">
@@ -853,7 +1002,6 @@ export default function AdminDashboard() {
                                         رجوع
                                     </button>
                                 </div>
-                                
                                 <div className="bg-white rounded-lg shadow-sm p-6">
                                     <form onSubmit={updateNews} className="space-y-6">
                                         <div>
@@ -868,7 +1016,6 @@ export default function AdminDashboard() {
                                                 required
                                             />
                                         </div>
-                                        
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-2">وصف الخبر</label>
                                             <textarea
@@ -881,7 +1028,6 @@ export default function AdminDashboard() {
                                                 required
                                             ></textarea>
                                         </div>
-                                        
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-2">رقم الموظف</label>
                                             <input
@@ -894,7 +1040,6 @@ export default function AdminDashboard() {
                                                 required
                                             />
                                         </div>
-                                        
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-2">رابط الخبر (اختياري)</label>
                                             <input
@@ -906,7 +1051,6 @@ export default function AdminDashboard() {
                                                 placeholder="أدخل رابط الخبر"
                                             />
                                         </div>
-                                        
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-2">تضمين (اختياري)</label>
                                             <input
@@ -918,7 +1062,6 @@ export default function AdminDashboard() {
                                                 placeholder="أدخل التضمين"
                                             />
                                         </div>
-                                        
                                         <div className="flex items-center">
                                             <input
                                                 type="checkbox"
@@ -930,7 +1073,6 @@ export default function AdminDashboard() {
                                             />
                                             <label htmlFor="status" className="mr-2 text-sm font-medium text-gray-700">نشر الخبر مباشرة</label>
                                         </div>
-                                        
                                         <div className="flex space-x-4 space-x-reverse pt-4">
                                             <button
                                                 type="submit"
