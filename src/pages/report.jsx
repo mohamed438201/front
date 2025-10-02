@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+
+const API_BASE = "https://sadq-proxy.pes450569.workers.dev";
 
 const ReportNewsPage = () => {
   const [formData, setFormData] = useState({
@@ -9,6 +11,15 @@ const ReportNewsPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notification, setNotification] = useState({ show: false, type: '', message: '' });
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -16,8 +27,6 @@ const ReportNewsPage = () => {
       ...prev,
       [name]: value
     }));
-    
-    // Clear notification when user starts typing
     if (notification.show) {
       setNotification({ show: false, type: '', message: '' });
     }
@@ -69,7 +78,8 @@ const ReportNewsPage = () => {
       if (formData.news_link) params.append('news_link', formData.news_link);
       params.append('description', formData.description);
 
-      const response = await fetch(`/api/reports?${params.toString()}`, {
+      // ✅ استخدام البروكسي هنا
+      const response = await fetch(`${API_BASE}/api/reports?${params.toString()}`, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
@@ -100,7 +110,7 @@ const ReportNewsPage = () => {
 
   return (
     <div dir="rtl" className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col">
-      <style jsx>{`
+      <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap');
         @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css');
         
@@ -143,7 +153,6 @@ const ReportNewsPage = () => {
           line-height: 1.6;
         }
         
-        /* Header Styles */
         .navbar {
           background: rgba(255, 255, 255, 0.87);
           backdrop-filter: blur(14px);
@@ -161,11 +170,6 @@ const ReportNewsPage = () => {
           background: rgba(255, 255, 255, 0.95);
           padding: 0.6rem 0;
           box-shadow: 0 4px 25px rgba(0,0,0,0.1);
-        }
-
-        .navbar.hidden {
-          transform: translateY(-100%);
-          transition: transform 0.5s ease;
         }
 
         .container {
@@ -214,10 +218,9 @@ const ReportNewsPage = () => {
           height: 35px;
         }
 
-        .navbar-logo img {
+        .navbar-logo svg {
           width: 100%;
           height: 100%;
-          object-fit: cover;
         }
 
         .navbar-nav {
@@ -359,7 +362,6 @@ const ReportNewsPage = () => {
           }
         }
 
-        /* Advanced Notification System */
         .notification-container {
           position: fixed;
           top: 20px;
@@ -455,7 +457,6 @@ const ReportNewsPage = () => {
           background: rgba(255, 255, 255, 0.3);
         }
 
-        /* Advanced Report Form Styles */
         .report-container {
           max-width: 800px;
           margin: 140px auto 80px;
@@ -643,7 +644,6 @@ const ReportNewsPage = () => {
           display: block;
         }
         
-        /* Footer Styles */
         .footer { 
           background: linear-gradient(135deg, #1a1a2e, #16213e);
           color: #fff; 
@@ -857,7 +857,7 @@ const ReportNewsPage = () => {
 
       {/* Header */}
       <header id="mainHeader">
-        <nav className="navbar" role="navigation" aria-label="القائمة الرئيسية">
+        <nav className={`navbar ${scrolled ? 'scrolled' : ''}`} role="navigation" aria-label="القائمة الرئيسية">
           <div className="container">
             <a className="navbar-brand" href="/" aria-label="العودة للصفحة الرئيسية">
               <div className="navbar-logo">
