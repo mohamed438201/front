@@ -959,8 +959,9 @@ const handleSearch = async (e) => {
   setIsSearching(true);
   setPage('results');
   try {
-    
-    const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+    // ✅ استخدام Cloudflare Worker كـ Proxy دائم
+    const workerUrl = 'https://sadq-proxy.pes450569.workers.dev';
+    const response = await fetch(`${workerUrl}/search?q=${encodeURIComponent(query)}`);
     
     const contentType = response.headers.get("content-type");
     if (!contentType || !contentType.includes("application/json")) {
