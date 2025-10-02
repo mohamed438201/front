@@ -81,7 +81,7 @@ export default function App() {
         setReportsData(reportsData.reports || []);
       }
     } catch (err) {
-      setError('❌ خطأ في تحميل البيانات');
+      setError(' خطأ في تحميل البيانات');
     } finally {
       setIsLoading(false);
     }
@@ -110,7 +110,7 @@ export default function App() {
         setError(data.message || 'فشل إضافة الخبر');
       }
     } catch (err) {
-      setError('❌ خطأ في الاتصال بالخادم');
+      setError(' خطأ في الاتصال بالخادم');
     } finally {
       setIsLoading(false);
     }
@@ -140,7 +140,7 @@ export default function App() {
         setError(data.message || 'فشل تحديث الخبر');
       }
     } catch (err) {
-      setError('❌ خطأ في الاتصال بالخادم');
+      setError(' خطأ في الاتصال بالخادم');
     } finally {
       setIsLoading(false);
     }
@@ -168,7 +168,7 @@ export default function App() {
         setError(data.message || 'فشل حذف الخبر');
       }
     } catch (err) {
-      setError('❌ خطأ في الاتصال بالخادم');
+      setError(' خطأ في الاتصال بالخادم');
     } finally {
       setIsLoading(false);
       setNewsToDelete(null);
@@ -194,7 +194,7 @@ export default function App() {
         setError(data.message || 'لم يتم العثور على الخبر');
       }
     } catch (err) {
-      setError('❌ خطأ في الاتصال بالخادم');
+      setError(' خطأ في الاتصال بالخادم');
     } finally {
       setIsLoading(false);
     }
@@ -221,7 +221,7 @@ export default function App() {
         setError(data.message || 'فشل تحديث الحالة');
       }
     } catch (err) {
-      setError('❌ خطأ في الاتصال بالخادم');
+      setError('خطأ في الاتصال بالخادم');
     } finally {
       setIsLoading(false);
       setSelectedReport(null);
@@ -278,7 +278,7 @@ export default function App() {
               >
                 <div><i className="fas fa-exclamation-triangle"></i></div>
                 <div className="flex-grow-1">
-                  <p className="mb-0">❌ {error}</p>
+                  <p className="mb-0"> {error}</p>
                 </div>
                 <button
                   onClick={() => setError('')}
@@ -295,7 +295,7 @@ export default function App() {
               >
                 <div><i className="fas fa-check-circle"></i></div>
                 <div className="flex-grow-1">
-                  <p className="mb-0">✅ {success}</p>
+                  <p className="mb-0">{success}</p>
                 </div>
                 <button
                   onClick={() => setSuccess('')}
@@ -465,7 +465,7 @@ export default function App() {
                 >
                   <i className="fas fa-exclamation-triangle"></i>
                   <div className="flex-grow-1">
-                    <p className="mb-0">❌ {error}</p>
+                    <p className="mb-0"> {error}</p>
                   </div>
                   <button
                     onClick={() => setError('')}
@@ -482,7 +482,7 @@ export default function App() {
                 >
                   <i className="fas fa-check-circle"></i>
                   <div className="flex-grow-1">
-                    <p className="mb-0">✅ {success}</p>
+                    <p className="mb-0"> {success}</p>
                   </div>
                   <button
                     onClick={() => setSuccess('')}
