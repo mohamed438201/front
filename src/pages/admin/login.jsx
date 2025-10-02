@@ -37,7 +37,7 @@ export default function AdminDashboard() {
         }));
     };
 
-    // ============ Login =============
+    // ============ Login ============
     const login = async (e) => {
         e.preventDefault();
         setIsLoading(true);
