@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
+
+const API_BASE = "https://sadq-proxy.pes450569.workers.dev";
 
 export default function AdminDashboard() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -35,6 +37,7 @@ export default function AdminDashboard() {
         }));
     };
 
+    // ============ Login =============
     const login = async (e) => {
         e.preventDefault();
         setIsLoading(true);
@@ -43,7 +46,7 @@ export default function AdminDashboard() {
         
         try {
             const params = new URLSearchParams(loginData).toString();
-            const response = await fetch(`http://127.0.0.1:8000/sadik/login?${params}`);
+            const response = await fetch(`${API_BASE}/sadik/login?${params}`);
             const data = await response.json();
             
             if (data.success) {
@@ -57,7 +60,7 @@ export default function AdminDashboard() {
                 setError(data.message);
             }
         } catch (err) {
-            setError('❌ خطأ في الاتصال بالخادم. تأكد من أن الخادم يعمل.');
+            setError('❌ خطأ في الاتصال بالخادم.');
         } finally {
             setIsLoading(false);
         }
@@ -68,270 +71,55 @@ export default function AdminDashboard() {
         setIsLoggedIn(false);
         setEmployeeData(null);
         setCurrentView('login');
-        setLoginData({ employee_id: '', password: '' });
     };
 
+    // ============ Dashboard Data ============
     const loadDashboardData = async () => {
-        setIsLoading(true);
-        setError('');
-        
         try {
-            const [statsResponse, employeesResponse, newsResponse] = await Promise.all([
-                fetch('http://127.0.0.1:8000/sadik/admin-dashboard'),
-                fetch('http://127.0.0.1:8000/sadik/employees'),
-                fetch('http://127.0.0.1:8000/sadik/news')
-            ]);
-            
-            const statsData = await statsResponse.json();
-            const employeesData = await employeesResponse.json();
-            const newsData = await newsResponse.json();
-            
-            if (statsData.success) {
-                setStats(statsData.stats);
-                setRecentLogs(statsData.recent_logs || []);
-            }
-            
-            if (employeesData.success) {
-                setEmployeesData(employeesData.employees || []);
-            }
-
-            if (newsData.success) {
-                setNewsData(newsData.news || []);
-            }
-            
-        } catch (err) {
-            setError('❌ خطأ في تحميل بيانات لوحة التحكم');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const addEmployee = async (e) => {
-        e.preventDefault();
-        setIsLoading(true);
-        setError('');
-        setSuccess('');
-        
-        try {
-            const response = await fetch('http://127.0.0.1:8000/sadik/add-employee', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newEmployee),
-            });
-            
+            const response = await fetch(`${API_BASE}/sadik/admin-dashboard`);
             const data = await response.json();
-            
-            if (data.success) {
-                setSuccess(data.message);
-                setNewEmployee({
-                    employee_id: '', name: '', department: '', position: '', email: '', phone: '', password: '', role: 'normal'
-                });
-                loadDashboardData();
-                setCurrentView('employees');
-            } else {
-                setError(data.message);
-            }
+            setStats(data.stats || {});
+            setRecentLogs(data.logs || []);
         } catch (err) {
-            setError('❌ خطأ في الاتصال بالخادم. تأكد من أن الخادم يعمل.');
-        } finally {
-            setIsLoading(false);
+            console.error("Error loading dashboard:", err);
         }
     };
 
-    const updateEmployee = async (e) => {
-        e.preventDefault();
-        setIsLoading(true);
-        setError('');
-        setSuccess('');
-        
+    // ============ Employees ============
+    const loadEmployees = async () => {
         try {
-            const response = await fetch('http://127.0.0.1:8000/sadik/update-employee', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(editEmployee),
-            });
-            
+            const response = await fetch(`${API_BASE}/sadik/employees`);
             const data = await response.json();
-            
-            if (data.success) {
-                setSuccess(data.message);
-                loadDashboardData();
-                setCurrentView('employees');
-            } else {
-                setError(data.message);
-            }
+            setEmployeesData(data.employees || []);
         } catch (err) {
-            setError('❌ خطأ في الاتصال بالخادم. تأكد من أن الخادم يعمل.');
-        } finally {
-            setIsLoading(false);
+            console.error("Error loading employees:", err);
         }
     };
 
-    const deleteEmployee = async (employeeId) => {
-        if (!window.confirm('هل أنت متأكد من حذف هذا الموظف؟')) {
-            return;
-        }
-        
-        setIsLoading(true);
-        setError('');
-        setSuccess('');
-        
+    // ============ News ============
+    const loadNews = async () => {
         try {
-            const response = await fetch('http://127.0.0.1:8000/sadik/delete-employee', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ employee_id: employeeId }),
-            });
-            
+            const response = await fetch(`${API_BASE}/sadik/news`);
             const data = await response.json();
-            
-            if (data.success) {
-                setSuccess(data.message);
-                loadDashboardData();
-            } else {
-                setError(data.message);
-            }
+            setNewsData(data.news || []);
         } catch (err) {
-            setError('❌ خطأ في الاتصال بالخادم. تأكد من أن الخادم يعمل.');
-        } finally {
-            setIsLoading(false);
+            console.error("Error loading news:", err);
         }
     };
 
-    const addNews = async (e) => {
-        e.preventDefault();
-        setIsLoading(true);
-        setError('');
-        setSuccess('');
-        
-        try {
-            const newsDataWithEmployee = {
-                ...newNews,
-                employee_id: employeeData.employee_id
-            };
-
-            const response = await fetch('http://127.0.0.1:8000/sadik/add-news', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newsDataWithEmployee),
-            });
-            
-            const data = await response.json();
-            
-            if (data.success) {
-                setSuccess(data.message);
-                setNewNews({
-                    title: '', description: '', url: '', embedding: '', status: true, employee_id: ''
-                });
-                loadDashboardData();
-                setCurrentView('news');
-            } else {
-                setError(data.message);
-            }
-        } catch (err) {
-            setError('❌ خطأ في الاتصال بالخادم. تأكد من أن الخادم يعمل.');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const getNewsForEdit = async (newsId) => {
-        setIsLoading(true);
-        try {
-            const response = await fetch(`http://127.0.0.1:8000/sadik/news/${newsId}`);
-            const data = await response.json();
-            
-            if (data.success) {
-                setEditNews({
-                    id: data.news.id,
-                    title: data.news.title,
-                    description: data.news.description,
-                    url: data.news.url || '',
-                    embedding: data.news.embedding || '',
-                    status: data.news.status,
-                    employee_id: data.news.employee_id
-                });
-            } else {
-                setError(data.message);
-            }
-        } catch (err) {
-            setError('❌ خطأ في الاتصال بالخادم. تأكد من أن الخادم يعمل.');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const updateNews = async (e) => {
-        e.preventDefault();
-        setIsLoading(true);
-        setError('');
-        setSuccess('');
-        
-        try {
-            const response = await fetch('http://127.0.0.1:8000/sadik/update-news', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(editNews),
-            });
-            
-            const data = await response.json();
-            
-            if (data.success) {
-                setSuccess(data.message);
-                loadDashboardData();
-                setCurrentView('news');
-            } else {
-                setError(data.message);
-            }
-        } catch (err) {
-            setError('❌ خطأ في الاتصال بالخادم. تأكد من أن الخادم يعمل.');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const deleteNews = async (newsId) => {
-        if (!window.confirm('هل أنت متأكد من حذف هذا الخبر؟')) {
-            return;
-        }
-        
-        setIsLoading(true);
-        setError('');
-        setSuccess('');
-        
-        try {
-            const response = await fetch('http://127.0.0.1:8000/sadik/delete-news', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: newsId }),
-            });
-            
-            const data = await response.json();
-            
-            if (data.success) {
-                setSuccess(data.message);
-                loadDashboardData();
-            } else {
-                setError(data.message);
-            }
-        } catch (err) {
-            setError('❌ خطأ في الاتصال بالخادم. تأكد من أن الخادم يعمل.');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
+    // ============ useEffect ============
     useEffect(() => {
-        const savedEmployee = localStorage.getItem('employee_data');
-        if (savedEmployee) {
-            const parsedData = JSON.parse(savedEmployee);
-            setEmployeeData(parsedData);
-            setNewNews(prev => ({ ...prev, employee_id: parsedData.employee_id }));
+        const stored = localStorage.getItem('employee_data');
+        if (stored) {
+            setEmployeeData(JSON.parse(stored));
             setIsLoggedIn(true);
             setCurrentView('dashboard');
             loadDashboardData();
+            loadEmployees();
+            loadNews();
         }
     }, []);
+
 
     if (isLoading) {
         return (
