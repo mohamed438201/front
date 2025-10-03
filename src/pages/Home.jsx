@@ -1325,20 +1325,18 @@ const handleSearch = async (e) => {
             <div className="col-lg-2 col-md-4 col-6">
               <h5 className="fw-bold mb-4">روابط سريعة</h5>
               <div className="footer-links">
-                <a href="#home" onClick={(e) => { e.preventDefault(); setPage('home'); }}>الرئيسية</a>
-                <a href="#about" onClick={(e) => { e.preventDefault(); document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' }); }}>حول المنصة</a>
-                <a href="#features" onClick={(e) => { e.preventDefault(); document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' }); }}>المميزات</a>
-                <a href="#contact" onClick={(e) => { e.preventDefault(); document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' }); }}>اتصل بنا</a>
+                <a href="/" onClick={(e) => { e.preventDefault(); setPage('home'); }}>الرئيسية</a>
+                <a href="about" onClick={(e) => { e.preventDefault(); document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' }); }}>حول المنصة</a>
+                <a href="contact" onClick={(e) => { e.preventDefault(); document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' }); }}>اتصل بنا</a>
+                <a href="privacy" onClick={(e) => { e.preventDefault(); document.getElementById('privacy')?.scrollIntoView({ behavior: 'smooth' }); }}>االسياسات والخصوصية</a>
+                <a href="report" onClick={(e) => { e.preventDefault(); document.getElementById('report')?.scrollIntoView({ behavior: 'smooth' }); }}>ارسال بلاغ خبري</a>
+                <a href="terms" onClick={(e) => { e.preventDefault(); document.getElementById('terms')?.scrollIntoView({ behavior: 'smooth' }); }}>شروط الاستخدام</a>
+
+              
+              
               </div>
             </div>
-            <div className="col-lg-3 col-md-4 col-6">
-              <h5 className="fw-bold mb-4">الخدمات</h5>
-              <div className="footer-links">
-                <a href="#search-heading" onClick={(e) => { e.preventDefault(); document.querySelector('.search-container')?.scrollIntoView({ behavior: 'smooth' }); }}>كشف الأخبار الكاذبة</a>
-                <a href="#features" onClick={(e) => { e.preventDefault(); document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' }); }}>تحليل المحتوى</a>
-                <a href="#about" onClick={(e) => { e.preventDefault(); document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' }); }}>الإحصائيات</a>
-              </div>
-            </div>
+           
             <div className="col-lg-3 col-md-4">
               <h5 className="fw-bold mb-4">تابعنا</h5>
               <div className="social-links mb-4">
