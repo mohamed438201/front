@@ -1324,17 +1324,14 @@ const handleSearch = async (e) => {
             </div>
             <div className="col-lg-2 col-md-4 col-6">
               <h5 className="fw-bold mb-4">روابط سريعة</h5>
-              <div className="footer-links">
-                <a href="/" onClick={(e) => { e.preventDefault(); setPage('home'); }}>الرئيسية</a>
-                <a href="about" onClick={(e) => { e.preventDefault(); document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' }); }}>حول المنصة</a>
-                <a href="contact" onClick={(e) => { e.preventDefault(); document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' }); }}>اتصل بنا</a>
-                <a href="privacy" onClick={(e) => { e.preventDefault(); document.getElementById('privacy')?.scrollIntoView({ behavior: 'smooth' }); }}>االسياسات والخصوصية</a>
-                <a href="report" onClick={(e) => { e.preventDefault(); document.getElementById('report')?.scrollIntoView({ behavior: 'smooth' }); }}>ارسال بلاغ خبري</a>
-                <a href="terms" onClick={(e) => { e.preventDefault(); document.getElementById('terms')?.scrollIntoView({ behavior: 'smooth' }); }}>شروط الاستخدام</a>
-
-              
-              
-              </div>
+      <div className="footer-links">
+  <a href="/">الرئيسية</a>
+  <a href="/about">حول المنصة</a>
+  <a href="/contact">اتصل بنا</a>
+  <a href="/privacy">السياسات والخصوصية</a>
+  <a href="/report">إرسال بلاغ خبري</a>
+  <a href="/terms">شروط الاستخدام</a>
+</div>
             </div>
            
             <div className="col-lg-3 col-md-4">
