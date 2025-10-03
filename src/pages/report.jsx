@@ -1052,21 +1052,12 @@ const ReportNewsPage = () => {
               <h5 className="footer-heading">روابط سريعة</h5>
               <ul className="footer-links">
                 <li><a href="/" className="footer-link">الرئيسية</a></li>
-                <li><a href="#about" className="footer-link">حول المنصة</a></li>
-                <li><a href="#features" className="footer-link">المميزات</a></li>
-                <li><a href="#contact" className="footer-link">اتصل بنا</a></li>
+                <li><a href="about" className="footer-link">حول المنصة</a></li>
+                <li><a href="contact" className="footer-link">اتصل بنا</a></li>
               </ul>
             </div>
             
-            <div className="footer-col">
-              <h5 className="footer-heading">الخدمات</h5>
-              <ul className="footer-links">
-                <li><a href="/" className="footer-link">كشف الأخبار الكاذبة</a></li>
-                <li><a href="#features" className="footer-link">تحليل المحتوى</a></li>
-                <li><a href="#about" className="footer-link">الإحصائيات</a></li>
-                <li><a href="#contact" className="footer-link">طلب دعم فني</a></li>
-              </ul>
-            </div>
+           
             
             <div className="footer-col">
               <h5 className="footer-heading">معلومات الاتصال</h5>
