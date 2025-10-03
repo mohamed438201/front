@@ -892,9 +892,9 @@ const AiSearchResultsPage = ({ query, result, onBack, isSearching }) => {
                  <i className="fas fa-search-minus"></i>
                  <h2>لم يتم العثور على الخبر</h2>
                  <p>لم نتمكن من العثور على معلومات بخصوص هذا الخبر في قاعدة بياناتنا. يمكنكم المساعدة بالإبلاغ عنه ليقوم فريقنا بالتحقق منه.</p>
-                 <button onClick={() => alert('سيتم إضافة صفحة الإبلاغ قريبًا!')} className="btn-report">
-                    <i className="fas fa-flag me-2"></i> الإبلاغ عن الخبر
-                 </button>
+                <button onClick={() => window.location.href = '/report'} className="btn-report">
+    <i className="fas fa-flag me-2"></i> الإبلاغ عن الخبر
+</button>
               </div>
             )}
           </div>
