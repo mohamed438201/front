@@ -898,15 +898,7 @@ const ReportNewsPage = () => {
                 <li className="nav-item">
                   <a className="nav-link" href="/">الرئيسية</a>
                 </li>
-                <li className="nav-item">
-                  <a className="nav-link" href="#about">حول المنصة</a>
-                </li>
-                <li className="nav-item">
-                  <a className="nav-link" href="#features">المميزات</a>
-                </li>
-                <li className="nav-item">
-                  <a className="nav-link" href="#contact">اتصل بنا</a>
-                </li>
+               
               </ul>
             </div>
           </div>
