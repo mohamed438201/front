@@ -378,9 +378,9 @@ export default function App() {
               </motion.div>
               <div>
                 <h1 className="h4 fw-bold text-dark-blue-900 mb-0">
-                  نظام صادق المتقدم
+                  نظام صادق 
                 </h1>
-                <p className="text-muted mb-0">لوحة التحكم الإدارية الذكية</p>
+                <p className="text-muted mb-0">لوحة التحكم الإدارية </p>
               </div>
             </div>
             <div className="d-flex align-items-center gap-3">
@@ -419,7 +419,7 @@ export default function App() {
             >
               <div className="mb-4 pb-3 border-bottom border-secondary-subtle">
                 <h2 className="h5 fw-bold text-dark-blue-900 mb-2">القائمة الرئيسية</h2>
-                <p className="text-muted">إدارة النظام بسهولة</p>
+                <p className="text-muted">القوائم الاساسية</p>
               </div>
               <nav className="list-group list-group-flush">
                 {[
