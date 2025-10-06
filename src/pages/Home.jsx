@@ -835,10 +835,10 @@ const AiSearchResultsPage = ({ query, result, onBack, isSearching }) => {
             <div className="col-lg-10">
               <div className="searching-state">
                 <div className="spinner-border text-primary" role="status">
-                  <span className="visually-hidden">جارٍ التحقق...</span>
+                  <span className="visually-hidden">جارٍ التحميل...</span>
                 </div>
-                <h3>جاري تحليل طلبك...</h3>
-                <p>يستخدم الذكاء الاصطناعي لفهم سؤالك والبحث في قاعدة البيانات لتقديم إجابة دقيقة.</p>
+                <h3>جارٍ البحث عن طبيبك...</h3>
+                <p>نستخدم الذكاء الاصطناعي في فهم سؤالك والبحث في قاعدة البيانات لإيجاد إجابة دقيقة.</p>
               </div>
             </div>
           </div>
@@ -846,6 +846,7 @@ const AiSearchResultsPage = ({ query, result, onBack, isSearching }) => {
       </main>
     );
   }
+
   return (
     <main className="search-results-page" id="main-content">
       <div className="container">
@@ -864,23 +865,27 @@ const AiSearchResultsPage = ({ query, result, onBack, isSearching }) => {
             </div>
             {result && result.answer ? (
               <div className="ai-answer-card">
-                <h2><i className="fas fa-magic-wand-sparkles me-3"></i>إجابة  صادق</h2>
+                <h2><i className="fas fa-magic-wand-sparkles me-3"></i>إجابة صادق</h2>
                 <p className="ai-answer-text">{result.answer}</p>
                 {result.source === 'ai' && (
                   <div className="ai-source-warning">
                     <i className="fas fa-exclamation-triangle me-2"></i>
-                    <strong>تنبيه:</strong> هذه المعلومات من الذكاء الاصطناعي وقد تحتوي الخطأ.
+                    <strong>تذكير:</strong> هذا المحتوى من صنع الذكاء الاصطناعي وقد تحتوي على خطأ.
                   </div>
                 )}
-                {result.source === 'database' && result.references && Object.keys(result.references).length > 0 && (
+                {result.references && Object.keys(result.references).length > 0 && (
                   <div className="references-section">
-                    <h3><i className="fas fa-book-open me-2"></i> المصدر الرئيسي</h3>
+                    <h3><i className="fas fa-book-open me-2"></i> المصادر الرسمية</h3>
                     <ul className="references-list">
-                      {/* Get the first reference only */}
-                      {Object.entries(result.references).slice(0, 1).map(([url, title]) => (
-                        <li key={url}>
-                          <span className="reference-title">{title}</span>
-                          {url && url !== '#' && <a href={url} target="_blank" rel="noopener noreferrer" className="reference-link">المصدر</a>}
+                      {/* عرض جميع المصادر */}
+                      {Object.entries(result.references).map(([id, ref]) => (
+                        <li key={id}>
+                          <span className="reference-title">{ref.title}</span>
+                          {ref.url && ref.url !== '#' && (
+                            <a href={ref.url} target="_blank" rel="noopener noreferrer" className="reference-link">
+                              المصدر
+                            </a>
+                          )}
                         </li>
                       ))}
                     </ul>
@@ -891,7 +896,7 @@ const AiSearchResultsPage = ({ query, result, onBack, isSearching }) => {
               <div className="no-results-card">
                  <i className="fas fa-search-minus"></i>
                  <h2>لم يتم العثور على الخبر</h2>
-                 <p>لم نتمكن من العثور على معلومات بخصوص هذا الخبر في قاعدة بياناتنا. يمكنكم المساعدة بالإبلاغ عنه ليقوم فريقنا بالتحقق منه.</p>
+                 <p>لم يتم العثور على خبر مطابق لعبارة بحثك. قد يكون الخبر غير متوفر أو بحاجة إلى صياغة بحثك بشكل أدق. نقدر مساعدتك بالإبلاغ عن الخبر المفقود.</p>
                 <button onClick={() => window.location.href = '/report'} className="btn-report">
     <i className="fas fa-flag me-2"></i> الإبلاغ عن الخبر
 </button>
@@ -959,10 +964,9 @@ const handleSearch = async (e) => {
   setIsSearching(true);
   setPage('results');
   try {
-    // ✅ استخدام Cloudflare Worker كـ Proxy دائم
+    // استخدام Cloudflare Worker في Proxy داخلي
     const workerUrl = 'https://sadq-proxy.pes450569.workers.dev';
     const response = await fetch(`${workerUrl}/api/search?q=${encodeURIComponent(query)}`);
-    
     const contentType = response.headers.get("content-type");
     if (!contentType || !contentType.includes("application/json")) {
       throw new Error("Invalid response format. Expected JSON.");
@@ -971,11 +975,8 @@ const handleSearch = async (e) => {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const data = await response.json();
-    if (data.source === 'ai') {
-      setAiSearchResult({ answer: null, source: 'not_found', references: [] });
-    } else {
-      setAiSearchResult(data);
-    }
+    // ✅ التعديل الأساسي: لا تلغي نتائج 'ai'!
+    setAiSearchResult(data);
   } catch (error) {
     console.error('Error fetching data from API:', error);
     showAlert('حدث خطأ أثناء الاتصال بالخادم. يرجى المحاولة لاحقًا.');
@@ -1009,7 +1010,7 @@ const handleSearch = async (e) => {
   }, [isMenuOpen]);
   if (loading) {
     return (
-      <div id="loading-screen" role="status" aria-live="polite" aria-label="شاشة تحميل محتمى الصفحة">
+      <div id="loading-screen" role="status" aria-live="polite" aria-label="شاشة تحميل الموقع">
         <div className="loading-content">
           <div className="loading-logo">
             <svg width="170" height="170" viewBox="0 0 170 170" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1035,7 +1036,7 @@ const handleSearch = async (e) => {
             <div className="progress"></div>
           </div>
           <span className="loading-text">
-            منصة صادق
+            صادق
           </span>
         </div>
         <style>{`
@@ -1055,10 +1056,10 @@ const handleSearch = async (e) => {
       <header id="mainHeader" ref={headerRef}>
         <nav className="navbar" role="navigation" aria-label="القائمة الرئيسية">
           <div className="container">
-            <a className="navbar-brand d-flex align-items-center" href="#" aria-label="العودة للصفحة الرئيسية" onClick={(e) => { e.preventDefault(); setPage('home'); setIsMenuOpen(false); }}>
+            <a className="navbar-brand d-flex align-items-center" href="#" aria-label="العودة إلى الصفحة الرئيسية" onClick={(e) => { e.preventDefault(); setPage('home'); setIsMenuOpen(false); }}>
               <div className="d-flex align-items-center">
                 <div className="navbar-logo me-2">
-                  <img src="https://sadq.rf.gd/assets/uploads/logo1.png" alt="شعار منصة صادق" />
+                  <img src="https://sadq.rf.gd/assets/uploads/logo1.png" alt="شعار صادق" />
                 </div>
                 <span className="fw-bold">صادق</span>
               </div>
@@ -1076,8 +1077,8 @@ const handleSearch = async (e) => {
             <div className={`navbar-collapse ${isMenuOpen ? 'show' : ''}`} id="navbarNav">
               <ul className="navbar-nav ms-auto">
                 <li className="nav-item"><a className="nav-link" href="#home" onClick={(e) => { e.preventDefault(); setPage('home'); setIsMenuOpen(false); }}>الرئيسية</a></li>
-                <li className="nav-item"><a className="nav-link" href="#about" onClick={(e) => { e.preventDefault(); document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' }); setIsMenuOpen(false); }}>حول المنصة</a></li>
-                <li className="nav-item"><a className="nav-link" href="#features" onClick={(e) => { e.preventDefault(); document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' }); setIsMenuOpen(false); }}>المميزات</a></li>
+                <li className="nav-item"><a className="nav-link" href="#about" onClick={(e) => { e.preventDefault(); document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' }); setIsMenuOpen(false); }}>حول الصادق</a></li>
+                <li className="nav-item"><a className="nav-link" href="#features" onClick={(e) => { e.preventDefault(); document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' }); setIsMenuOpen(false); }}>المزايا</a></li>
                 <li className="nav-item"><a className="nav-link" href="#contact" onClick={(e) => { e.preventDefault(); document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' }); setIsMenuOpen(false); }}>اتصل بنا</a></li>
               </ul>
             </div>
@@ -1089,14 +1090,14 @@ const handleSearch = async (e) => {
           <section className="hero-section" id="home" aria-labelledby="hero-title">
             <div className="container text-center hero-content">
               <h1 className="hero-title" id="hero-title">
-                منصة صادق
+                صادق
               </h1>
               <p className="hero-subtitle">
-                تحقق من صحة الأخبار والمعلومات باستخدام تقنيات الذكاء الاصطناعي المتقدمة والمعومات الموثوقة
+                تبحث عن صحة الأخبار والمعلومات باستخدام تقنيات الذكاء الاصطناعي المتقدمة والتحقق من المعلومات الموثوقة
               </p>
-              <div className="government-badge pulse" role="region" aria-label="بيان رسمي">
+              <div className="government-badge pulse" role="region" aria-label="بها رسمية">
                 <i className="fas fa-star me-2"></i>
-                منصة رسمية تابعة للحكومة المصرية
+                صادق رسمية تابعة لوزارة الصحة المصرية
               </div>
             </div>
           </section>
@@ -1104,19 +1105,19 @@ const handleSearch = async (e) => {
             <div className="search-container shadow-xl">
               <div className="text-center mb-5">
                 <h2 className="h3 mb-3 fw-bold" id="search-heading">
-                  <i className="fas fa-magnifying-glass me-3"></i> اسأل بذكاء، واحصل على إجابة
+                  <i className="fas fa-magnifying-glass me-3"></i> اسأل بذكاء واحصل على إجابة
                 </h2>
-                <p className="text-muted lead">أدخل سؤالك أو الخبر المراد التحقق منه...</p>
+                <p className="text-muted lead">أدخل سؤالك أو الخبر الذي تريد التحقق منه...</p>
               </div>
               <form onSubmit={handleSearch}>
                 <div className="row g-4">
                   <div className="col-md-9">
-                    <label htmlFor="search-input" className="visually-hidden">أدخل الخبر هنا</label>
+                    <label htmlFor="search-input" className="visually-hidden">أدخل الخبر الذي تريد التحقق منه</label>
                     <input
                       type="text"
                       id="search-input"
                       className="form-control search-input"
-                      placeholder="مثال: ما هي آخر قرارات البنك المركزي؟"
+                      placeholder="مثال: ما هي آخر قرارات وزارة الصحة حول التطعيمات؟"
                       value={query}
                       onChange={(e) => setQuery(e.target.value)}
                       required
@@ -1132,7 +1133,7 @@ const handleSearch = async (e) => {
                       {isSearching ? (
                         <>
                           <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                          جاري البحث...
+                          جارٍ البحث...
                         </>
                       ) : (
                         <>
@@ -1146,7 +1147,7 @@ const handleSearch = async (e) => {
               <div className="text-center mt-4">
                 <small className="text-muted">
                   <i className="fas fa-lock me-2"></i>
-                  جميع عمليات البحث آمنة ومشفرة ومدعومة بتقنيات الأمان المتقدمة
+                  جميع عمليات البحث آمنة ومحمية بتدابير الأمان المتطورة
                 </small>
               </div>
             </div>
@@ -1154,29 +1155,29 @@ const handleSearch = async (e) => {
           <section className="section-padding" id="features" aria-labelledby="features-heading">
             <div className="container">
               <div className="text-center mb-5">
-                <h2 className="display-5 fw-bold" id="features-heading">مميزات المنصة</h2>
-                <p className="lead text-muted">تقنيات متقدمة لضمان دقة المعلومات وموضوعيتها</p>
+                <h2 className="display-5 fw-bold" id="features-heading">مزايا الصادق</h2>
+                <p className="lead text-muted">تستخدم تقنيات متقدمة في التحقق من المعلومات وعرضها بشكل موثوق ودقيق</p>
               </div>
               <div className="row g-5">
                 <div className="col-md-4">
                   <div className="feature-card rounded-lg h-100">
                     <div className="feature-icon"><i className="fas fa-robot"></i></div>
                     <h4 className="fw-bold">الذكاء الاصطناعي</h4>
-                    <p className="text-muted mt-3">تحليل متقدم باستخدام خوارزميات الذكاء الاصطناعي المتقدمة للكشف عن الأخبار المضللة والتحقق من صحتها</p>
+                    <p className="text-muted mt-3">تحقق باستخدام خوارزميات الذكاء الاصطناعي المتقدمة في فهم الأخبار المضللة والتحقق من صحتها</p>
                   </div>
                 </div>
                 <div className="col-md-4">
                   <div className="feature-card rounded-lg h-100">
                     <div className="feature-icon"><i className="fas fa-bolt"></i></div>
                     <h4 className="fw-bold">سرعة فائقة</h4>
-                    <p className="text-muted mt-3">نتائج فورية خلال ثوان مع تحليل شامل للمحتوى ومسائل المعلومات</p>
+                    <p className="text-muted mt-3">نتائج دقيقة خلال ثوانٍ قليلة مع تحليل شامل لمصادر المعلومات</p>
                   </div>
                 </div>
                 <div className="col-md-4">
                   <div className="feature-card rounded-lg h-100">
                     <div className="feature-icon"><i className="fas fa-certificate"></i></div>
                     <h4 className="fw-bold">موثوقية عالية</h4>
-                    <p className="text-muted mt-3">دقة تصل إلى 95% في كشف الأخبار الكاذبة والمعلومات المضللة مع تقارير مفصلة</p>
+                    <p className="text-muted mt-3">دقة تصل إلى 95% في تحليل الأخبار المزيفة والتحقق من المعلومات الموثوقة</p>
                   </div>
                 </div>
               </div>
@@ -1185,8 +1186,8 @@ const handleSearch = async (e) => {
           <section className="stats-section section-padding-sm" id="about" aria-labelledby="stats-heading">
             <div className="container">
               <div className="text-center mb-5">
-                <h2 className="display-5 fw-bold" id="stats-heading">إحصائيات المنصة</h2>
-                <p className="lead text-muted">أرقام توضح ثقة الجمهور في المنصة وفعاليتها</p>
+                <h2 className="display-5 fw-bold" id="stats-heading">إحصائيات الصادق</h2>
+                <p className="lead text-muted">أرقام توضح ثقة الجمهور في الصادق وفعاليته</p>
               </div>
               <div className="row g-4">
                 <div className="col-md-3 col-6">
@@ -1198,19 +1199,19 @@ const handleSearch = async (e) => {
                 <div className="col-md-3 col-6">
                   <div className="stat-card rounded-lg">
                     <span className="stat-number">95%</span>
-                    <p className="text-muted fw-bold">دقة النتائج</p>
+                    <p className="text-muted fw-bold">دقة التحقق</p>
                   </div>
                 </div>
                 <div className="col-md-3 col-6">
                   <div className="stat-card rounded-lg">
                     <span className="stat-number">500K+</span>
-                    <p className="text-muted fw-bold">مستخدم نشط</p>
+                    <p className="text-muted fw-bold">مستخدم شهري</p>
                   </div>
                 </div>
                 <div className="col-md-3 col-6">
                   <div className="stat-card rounded-lg">
                     <span className="stat-number">24/7</span>
-                    <p className="text-muted fw-bold">خدمة متواصلة</p>
+                    <p className="text-muted fw-bold">خدمة متاحة</p>
                   </div>
                 </div>
               </div>
@@ -1219,30 +1220,30 @@ const handleSearch = async (e) => {
           <section className="section-padding bg-white" aria-labelledby="how-it-works-heading">
             <div className="container">
               <div className="text-center mb-5">
-                <h2 className="display-5 fw-bold" id="how-it-works-heading">كيف تعمل المنصة؟</h2>
-                <p className="lead text-muted">خطوات بسيطة وسهلة للتحقق من صحة الأخبار والمعلومات</p>
+                <h2 className="display-5 fw-bold" id="how-it-works-heading">كيف تعمل الصادق؟</h2>
+                <p className="lead text-muted">خطوات بسيطة للتحقق من صحة الأخبار والمعلومات</p>
               </div>
               <div className="row g-5">
                 <div className="col-md-4 text-center step-card">
                   <div className="step-1">
                     <div className="step-icon">1</div>
                   </div>
-                  <h4 className="mt-4 fw-bold">أدخل النص</h4>
-                  <p className="text-muted mt-3">اكتب عنوان الخبر أو النص المراد التحقق منه في مربع البحث</p>
+                  <h4 className="mt-4 fw-bold">أدخل الخبر</h4>
+                  <p className="text-muted mt-3">اكتب الخبر أو السؤال الذي تريد التحقق منه في شريط البحث</p>
                 </div>
                 <div className="col-md-4 text-center step-card">
                   <div className="step-2">
                     <div className="step-icon">2</div>
                   </div>
-                  <h4 className="mt-4 fw-bold">التحليل الذكي</h4>
-                  <p className="text-muted mt-3">يقوم النظام بتحليل النص باستخدام خوارزميات الذكاء الاصطناعي المتقدمة</p>
+                  <h4 className="mt-4 fw-bold">التحقق الذكي</h4>
+                  <p className="text-muted mt-3">يقوم النظام بالتحقق من الخبر باستخدام خوارزميات الذكاء الاصطناعي المتقدمة</p>
                 </div>
                 <div className="col-md-4 text-center step-card">
                   <div className="step-3">
                     <div className="step-icon">3</div>
                   </div>
-                  <h4 className="mt-4 fw-bold">النتيجة الفورية</h4>
-                  <p className="text-muted mt-3">احصل على تقرير مفصل حول مدى صحة الخبر مع التوضيحات اللازمة</p>
+                  <h4 className="mt-4 fw-bold">النتيجة الموثوقة</h4>
+                  <p className="text-muted mt-3">احصل على تقرير مفصل حول صحة الخبر مع المصادر الرسمية</p>
                 </div>
               </div>
             </div>
@@ -1250,14 +1251,14 @@ const handleSearch = async (e) => {
           <section className="section-padding bg-light" id="contact" aria-labelledby="contact-heading">
             <div className="container">
               <div className="text-center mb-5">
-                <h2 className="display-5 fw-bold" id="contact-heading">تواصل معنا</h2>
-                <p className="lead text-muted">نحن هنا لمساعدتك في أي استفسار أو ملاحظة</p>
+                <h2 className="display-5 fw-bold" id="contact-heading">اتصل بنا</h2>
+                <p className="lead text-muted">لمساعدتك في أي استفسار أو ملاحظة</p>
               </div>
               <div className="row g-4 justify-content-center">
                 <div className="col-md-4">
                   <div className="feature-card rounded-lg h-100">
                     <i className="fas fa-phone-alt text-primary fs-1 mb-4"></i>
-                    <h5 className="fw-bold">الهاتف</h5>
+                    <h5 className="fw-bold">الاتصال</h5>
                     <p className="text-muted fs-5">16000</p>
                   </div>
                 </div>
@@ -1272,7 +1273,7 @@ const handleSearch = async (e) => {
                   <div className="feature-card rounded-lg h-100">
                     <i className="fas fa-map-marker-alt text-danger fs-1 mb-4"></i>
                     <h5 className="fw-bold">العنوان</h5>
-                    <p className="text-muted fs-5">القاهرة، الحكومة المصرية</p>
+                    <p className="text-muted fs-5">القاهرة – وزارة الصحة المصرية</p>
                   </div>
                 </div>
               </div>
@@ -1314,36 +1315,35 @@ const handleSearch = async (e) => {
                   </svg>
                 </div>
                 <div>
-                  <h4 className="mb-2">منصة صادق</h4>
-                  <p className="text-muted mb-0">الحكومة المصرية</p>
+                  <h4 className="mb-2">صادق</h4>
+                  <p className="text-muted mb-0">الوزارة المصرية</p>
                 </div>
               </div>
               <p className="text-muted lead">
-                منصة رسمية تابعة للحكومة المصرية لمكافحة الأخبار الكاذبة والمعلومات المضللة وتعزيز الثقة في المعلومات.
+                صادق رسمية تابعة لوزارة الصحة المصرية تُعنى بالتحقق من الأخبار المزيفة والمعلومات المضللة وتُعزز الثقة في المصادر.
               </p>
             </div>
             <div className="col-lg-2 col-md-4 col-6">
               <h5 className="fw-bold mb-4">روابط سريعة</h5>
       <div className="footer-links">
   <a href="/">الرئيسية</a>
-  <a href="/about">حول المنصة</a>
+  <a href="/about">حول الصادق</a>
   <a href="/contact">اتصل بنا</a>
-  <a href="/privacy">السياسات والخصوصية</a>
-  <a href="/report">إرسال بلاغ خبري</a>
+  <a href="/privacy">الخصوصية</a>
+  <a href="/report">الإبلاغ عن خبر</a>
   <a href="/terms">شروط الاستخدام</a>
 </div>
             </div>
-           
             <div className="col-lg-3 col-md-4">
               <h5 className="fw-bold mb-4">تابعنا</h5>
               <div className="social-links mb-4">
                 <a href="#" aria-label="صفحة فيسبوك"><i className="fab fa-facebook-f"></i></a>
                 <a href="#" aria-label="حساب تويتر"><i className="fab fa-twitter"></i></a>
-                <a href="#" aria-label="حساب انستغرام"><i className="fab fa-instagram"></i></a>
+                <a href="#" aria-label="حساب الإنستغرام"><i className="fab fa-instagram"></i></a>
                 <a href="#" aria-label="قناة يوتيوب"><i className="fab fa-youtube"></i></a>
               </div>
               <p className="text-muted small">
-                <i className="fas fa-copyright me-1"></i> 2024 جميع الحقوق محفوظة - الحكومة المصرية
+                <i className="fas fa-copyright me-1"></i> 2024 جميع الحقوق محفوظة - وزارة الصحة المصرية
               </p>
             </div>
           </div>
