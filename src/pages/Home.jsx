@@ -826,6 +826,8 @@ const appStyles = `
     background: linear-gradient(135deg, #ffcd39, var(--warning-color));
   }
 `;
+
+// ✅ مكون عرض النتائج بعد التعديل
 const AiSearchResultsPage = ({ query, result, onBack, isSearching }) => {
   if (isSearching) {
     return (
@@ -873,13 +875,13 @@ const AiSearchResultsPage = ({ query, result, onBack, isSearching }) => {
                     <strong>تذكير:</strong> هذا المحتوى من صنع الذكاء الاصطناعي وقد تحتوي على خطأ.
                   </div>
                 )}
-                {result.references && Object.keys(result.references).length > 0 && (
+                {/* ✅ عرض جميع المصادر كمصفوفة */}
+                {result.references && Array.isArray(result.references) && result.references.length > 0 && (
                   <div className="references-section">
                     <h3><i className="fas fa-book-open me-2"></i> المصادر الرسمية</h3>
                     <ul className="references-list">
-                      {/* عرض جميع المصادر */}
-                      {Object.entries(result.references).map(([id, ref]) => (
-                        <li key={id}>
+                      {result.references.map((ref, index) => (
+                        <li key={index}>
                           <span className="reference-title">{ref.title}</span>
                           {ref.url && ref.url !== '#' && (
                             <a href={ref.url} target="_blank" rel="noopener noreferrer" className="reference-link">
@@ -898,8 +900,8 @@ const AiSearchResultsPage = ({ query, result, onBack, isSearching }) => {
                  <h2>لم يتم العثور على الخبر</h2>
                  <p>لم يتم العثور على خبر مطابق لعبارة بحثك. قد يكون الخبر غير متوفر أو بحاجة إلى صياغة بحثك بشكل أدق. نقدر مساعدتك بالإبلاغ عن الخبر المفقود.</p>
                 <button onClick={() => window.location.href = '/report'} className="btn-report">
-    <i className="fas fa-flag me-2"></i> الإبلاغ عن الخبر
-</button>
+                  <i className="fas fa-flag me-2"></i> الإبلاغ عن الخبر
+                </button>
               </div>
             )}
           </div>
@@ -908,6 +910,7 @@ const AiSearchResultsPage = ({ query, result, onBack, isSearching }) => {
     </main>
   );
 };
+
 const CustomAlert = ({ message, show }) => {
   return (
     <div className={`custom-alert ${show ? 'show' : ''}`} role="alert">
@@ -916,6 +919,7 @@ const CustomAlert = ({ message, show }) => {
     </div>
   );
 };
+
 export default function App() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState('home');
@@ -925,6 +929,7 @@ export default function App() {
   const [alert, setAlert] = useState({ show: false, message: '' });
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const headerRef = useRef(null);
+
   useEffect(() => {
     const fontAwesomeLink = document.createElement('link');
     fontAwesomeLink.rel = 'stylesheet';
@@ -933,6 +938,7 @@ export default function App() {
     const timer = setTimeout(() => setLoading(false), 2500);
     return () => clearTimeout(timer);
   }, []);
+
   useEffect(() => {
     let lastScrollY = window.scrollY;
     const header = document.getElementById("mainHeader");
@@ -953,38 +959,40 @@ export default function App() {
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
   const showAlert = (message) => {
     setAlert({ show: true, message });
     setTimeout(() => setAlert({ show: false, message: '' }), 4500);
   };
-  // --- search by mohamed sherif ---
-const handleSearch = async (e) => {
-  e.preventDefault();
-  if (!query.trim() || isSearching) return;
-  setIsSearching(true);
-  setPage('results');
-  try {
-    // استخدام Cloudflare Worker في Proxy داخلي
-    const workerUrl = 'https://sadq-proxy.pes450569.workers.dev';
-    const response = await fetch(`${workerUrl}/api/search?q=${encodeURIComponent(query)}`);
-    const contentType = response.headers.get("content-type");
-    if (!contentType || !contentType.includes("application/json")) {
-      throw new Error("Invalid response format. Expected JSON.");
+
+  // ✅ دالة البحث بعد التعديل
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    if (!query.trim() || isSearching) return;
+    setIsSearching(true);
+    setPage('results');
+    try {
+      const workerUrl = 'https://sadq-proxy.pes450569.workers.dev';
+      const response = await fetch(`${workerUrl}/api/search?q=${encodeURIComponent(query)}`);
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Invalid response format. Expected JSON.");
+      }
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      // ✅ تم إزالة الشرط الخاطئ تمامًا
+      setAiSearchResult(data);
+    } catch (error) {
+      console.error('Error fetching data from API:', error);
+      showAlert('حدث خطأ أثناء الاتصال بالخادم. يرجى المحاولة لاحقًا.');
+      setAiSearchResult({ answer: null, source: 'error', references: [] });
+    } finally {
+      setIsSearching(false);
     }
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const data = await response.json();
-    // ✅ التعديل الأساسي: لا تلغي نتائج 'ai'!
-    setAiSearchResult(data);
-  } catch (error) {
-    console.error('Error fetching data from API:', error);
-    showAlert('حدث خطأ أثناء الاتصال بالخادم. يرجى المحاولة لاحقًا.');
-    setAiSearchResult({ answer: null, source: 'error', references: [] });
-  } finally {
-    setIsSearching(false);
-  }
-};
+  };
+
   useEffect(() => {
     const handleScrollAnimations = () => {
       const elements = document.querySelectorAll('.feature-card, .stat-card, .step-card');
@@ -999,6 +1007,7 @@ const handleSearch = async (e) => {
     handleScrollAnimations(); 
     return () => window.removeEventListener('scroll', handleScrollAnimations);
   }, [page]);
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (isMenuOpen && !event.target.closest('.navbar')) {
@@ -1008,6 +1017,7 @@ const handleSearch = async (e) => {
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
   }, [isMenuOpen]);
+
   if (loading) {
     return (
       <div id="loading-screen" role="status" aria-live="polite" aria-label="شاشة تحميل الموقع">
@@ -1049,6 +1059,7 @@ const handleSearch = async (e) => {
       </div>
     );
   }
+
   return (
     <div dir="rtl" style={{ backgroundColor: "var(--light-bg-color)", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       <style>{appStyles}</style>
@@ -1152,6 +1163,7 @@ const handleSearch = async (e) => {
               </div>
             </div>
           </section>
+          {/* باقي أقسام الصفحة كما هي */}
           <section className="section-padding" id="features" aria-labelledby="features-heading">
             <div className="container">
               <div className="text-center mb-5">
@@ -1325,14 +1337,14 @@ const handleSearch = async (e) => {
             </div>
             <div className="col-lg-2 col-md-4 col-6">
               <h5 className="fw-bold mb-4">روابط سريعة</h5>
-      <div className="footer-links">
-  <a href="/">الرئيسية</a>
-  <a href="/about">حول الصادق</a>
-  <a href="/contact">اتصل بنا</a>
-  <a href="/privacy">الخصوصية</a>
-  <a href="/report">الإبلاغ عن خبر</a>
-  <a href="/terms">شروط الاستخدام</a>
-</div>
+              <div className="footer-links">
+                <a href="/">الرئيسية</a>
+                <a href="/about">حول الصادق</a>
+                <a href="/contact">اتصل بنا</a>
+                <a href="/privacy">الخصوصية</a>
+                <a href="/report">الإبلاغ عن خبر</a>
+                <a href="/terms">شروط الاستخدام</a>
+              </div>
             </div>
             <div className="col-lg-3 col-md-4">
               <h5 className="fw-bold mb-4">تابعنا</h5>
