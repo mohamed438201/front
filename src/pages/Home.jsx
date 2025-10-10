@@ -839,7 +839,7 @@ const AiSearchResultsPage = ({ query, result, onBack, isSearching }) => {
                 <div className="spinner-border text-primary" role="status">
                   <span className="visually-hidden">جارٍ التحميل...</span>
                 </div>
-                <h3>جارٍ البحث عن طبيبك...</h3>
+                <h3>جارٍ البحث عن الخبر...</h3>
                 <p>نستخدم الذكاء الاصطناعي في فهم سؤالك والبحث في قاعدة البيانات لإيجاد إجابة دقيقة.</p>
               </div>
             </div>
