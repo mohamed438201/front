@@ -827,6 +827,7 @@ const appStyles = `
     background: linear-gradient(135deg, #ffcd39, var(--warning-color));
   }
 `;
+
 const AiSearchResultsPage = ({ query, result, onBack, isSearching }) => {
   if (isSearching) {
     return (
@@ -873,20 +874,21 @@ const AiSearchResultsPage = ({ query, result, onBack, isSearching }) => {
                     <strong>تنبيه:</strong> هذه المعلومات من الذكاء الاصطناعي وقد تحتوي الخطأ.
                   </div>
                 )}
-                {result.source === 'database' && result.references && Object.keys(result.references).length > 0 && (
+                {/* ✅ FIX START: Check if references is an array and has items */}
+                {result.source === 'database' && Array.isArray(result.references) && result.references.length > 0 && (
                   <div className="references-section">
                     <h3><i className="fas fa-book-open me-2"></i> المصدر الرئيسي</h3>
                     <ul className="references-list">
-                      {/* Get the first reference only */}
-                      {Object.entries(result.references).slice(0, 1).map(([url, title]) => (
-                        <li key={url}>
-                          <span className="reference-title">{title}</span>
-                          {url && url !== '#' && <a href={url} target="_blank" rel="noopener noreferrer" className="reference-link">المصدر</a>}
+                      {result.references.slice(0, 1).map((reference, index) => (
+                        <li key={index}>
+                          <span className="reference-title">{reference.title}</span>
+                          {reference.url && reference.url !== '#' && <a href={reference.url} target="_blank" rel="noopener noreferrer" className="reference-link">المصدر</a>}
                         </li>
                       ))}
                     </ul>
                   </div>
                 )}
+                 {/* ✅ FIX END */}
               </div>
             ) : (
               <div className="no-results-card">
@@ -921,6 +923,7 @@ export default function App() {
   const [alert, setAlert] = useState({ show: false, message: '' });
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const headerRef = useRef(null);
+  
   useEffect(() => {
     const fontAwesomeLink = document.createElement('link');
     fontAwesomeLink.rel = 'stylesheet';
@@ -929,6 +932,7 @@ export default function App() {
     const timer = setTimeout(() => setLoading(false), 2500);
     return () => clearTimeout(timer);
   }, []);
+
   useEffect(() => {
     let lastScrollY = window.scrollY;
     const header = document.getElementById("mainHeader");
@@ -949,20 +953,18 @@ export default function App() {
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
   const showAlert = (message) => {
     setAlert({ show: true, message });
     setTimeout(() => setAlert({ show: false, message: '' }), 4500);
   };
   
-  // --- search by mohamed sherif ---
-  // ✅  This function has been fixed
   const handleSearch = async (e) => {
     e.preventDefault();
     if (!query.trim() || isSearching) return;
     setIsSearching(true);
     setPage('results');
     try {
-      // Use Cloudflare Worker as a proxy
       const workerUrl = 'https://sadq-proxy.pes450569.workers.dev';
       const response = await fetch(`${workerUrl}/api/search?q=${encodeURIComponent(query)}`);
       
@@ -975,8 +977,6 @@ export default function App() {
       }
       const data = await response.json();
       
-      // FIX: Directly set the search result from the API response
-      // This allows both 'database' and 'ai' sources to be displayed correctly.
       setAiSearchResult(data);
 
     } catch (error) {
@@ -1002,6 +1002,7 @@ export default function App() {
     handleScrollAnimations(); 
     return () => window.removeEventListener('scroll', handleScrollAnimations);
   }, [page]);
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (isMenuOpen && !event.target.closest('.navbar')) {
@@ -1011,6 +1012,7 @@ export default function App() {
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
   }, [isMenuOpen]);
+
   if (loading) {
     return (
       <div id="loading-screen" role="status" aria-live="polite" aria-label="شاشة تحميل محتمى الصفحة">
@@ -1052,6 +1054,7 @@ export default function App() {
       </div>
     );
   }
+
   return (
     <div dir="rtl" style={{ backgroundColor: "var(--light-bg-color)", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       <style>{appStyles}</style>
