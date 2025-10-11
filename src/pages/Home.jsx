@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+
 const appStyles = `
   @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap');
   @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css');
@@ -889,12 +890,12 @@ const AiSearchResultsPage = ({ query, result, onBack, isSearching }) => {
               </div>
             ) : (
               <div className="no-results-card">
-                 <i className="fas fa-search-minus"></i>
-                 <h2>لم يتم العثور على الخبر</h2>
-                 <p>لم نتمكن من العثور على معلومات بخصوص هذا الخبر في قاعدة بياناتنا. يمكنكم المساعدة بالإبلاغ عنه ليقوم فريقنا بالتحقق منه.</p>
-                 <button onClick={() => alert('سيتم إضافة صفحة الإبلاغ قريبًا!')} className="btn-report">
-                    <i className="fas fa-flag me-2"></i> الإبلاغ عن الخبر
-                 </button>
+                   <i className="fas fa-search-minus"></i>
+                   <h2>لم يتم العثور على الخبر</h2>
+                   <p>لم نتمكن من العثور على معلومات بخصوص هذا الخبر في قاعدة بياناتنا. يمكنكم المساعدة بالإبلاغ عنه ليقوم فريقنا بالتحقق منه.</p>
+                   <button onClick={() => alert('سيتم إضافة صفحة الإبلاغ قريبًا!')} className="btn-report">
+                     <i className="fas fa-flag me-2"></i> الإبلاغ عن الخبر
+                   </button>
               </div>
             )}
           </div>
@@ -952,38 +953,41 @@ export default function App() {
     setAlert({ show: true, message });
     setTimeout(() => setAlert({ show: false, message: '' }), 4500);
   };
+  
   // --- search by mohamed sherif ---
-const handleSearch = async (e) => {
-  e.preventDefault();
-  if (!query.trim() || isSearching) return;
-  setIsSearching(true);
-  setPage('results');
-  try {
-    // ✅ استخدام Cloudflare Worker كـ Proxy دائم
-    const workerUrl = 'https://sadq-proxy.pes450569.workers.dev';
-    const response = await fetch(`${workerUrl}/api/search?q=${encodeURIComponent(query)}`);
-    
-    const contentType = response.headers.get("content-type");
-    if (!contentType || !contentType.includes("application/json")) {
-      throw new Error("Invalid response format. Expected JSON.");
-    }
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const data = await response.json();
-    if (data.source === 'ai') {
-      setAiSearchResult({ answer: null, source: 'not_found', references: [] });
-    } else {
+  // ✅  This function has been fixed
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    if (!query.trim() || isSearching) return;
+    setIsSearching(true);
+    setPage('results');
+    try {
+      // Use Cloudflare Worker as a proxy
+      const workerUrl = 'https://sadq-proxy.pes450569.workers.dev';
+      const response = await fetch(`${workerUrl}/api/search?q=${encodeURIComponent(query)}`);
+      
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Invalid response format. Expected JSON.");
+      }
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      
+      // FIX: Directly set the search result from the API response
+      // This allows both 'database' and 'ai' sources to be displayed correctly.
       setAiSearchResult(data);
+
+    } catch (error) {
+      console.error('Error fetching data from API:', error);
+      showAlert('حدث خطأ أثناء الاتصال بالخادم. يرجى المحاولة لاحقًا.');
+      setAiSearchResult({ answer: null, source: 'error', references: [] });
+    } finally {
+      setIsSearching(false);
     }
-  } catch (error) {
-    console.error('Error fetching data from API:', error);
-    showAlert('حدث خطأ أثناء الاتصال بالخادم. يرجى المحاولة لاحقًا.');
-    setAiSearchResult({ answer: null, source: 'error', references: [] });
-  } finally {
-    setIsSearching(false);
-  }
-};
+  };
+
   useEffect(() => {
     const handleScrollAnimations = () => {
       const elements = document.querySelectorAll('.feature-card, .stat-card, .step-card');
