@@ -536,8 +536,6 @@ const appStyles = `
     transform: translateY(-5px) rotate(0deg);
     box-shadow: 0 10px 25px rgba(0,0,0,0.25);
   }
-  
-  /* --- Improved Loading Screen --- */
   #loading-screen {
     position: fixed;
     top: 0;
@@ -551,46 +549,58 @@ const appStyles = `
     z-index: 9999;
     flex-direction: column;
     text-align: center;
-    opacity: 1;
-    transition: opacity 0.5s ease-out;
-  }
-  #loading-screen.hidden {
-    opacity: 0;
-    pointer-events: none;
   }
   .loading-content {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 45px;
+    gap: 35px;
+    position: relative;
   }
   .loading-logo {
     width: 170px;
     height: auto;
-    animation: pulse-fade-in 2.5s ease-in-out infinite;
+    margin-bottom: 30px;
+    animation: float 3.5s ease-in-out infinite;
   }
-  @keyframes pulse-fade-in {
-    0% { transform: scale(0.95); opacity: 0.7; }
-    50% { transform: scale(1.02); opacity: 1; }
-    100% { transform: scale(0.95); opacity: 0.7; }
+  @keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-25px); }
+    100% { transform: translateY(0px); }
   }
-  .loading-text-container {
-    font-size: 2.2rem;
+  .progress-bar {
+    width: 380px;
+    height: 10px;
+    background: rgba(255,255,255,0.25);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 5px 18px rgba(0,0,0,0.12);
+  }
+  .progress {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, #fff, #e0e0e0);
+    animation: load 2s ease-in-out forwards;
+    border-radius: 12px;
+  }
+  .loading-text {
+    position: absolute;
+    bottom: -70px;
+    opacity: 0;
+    font-size: 2rem;
     font-weight: 800;
     color: #fff;
     text-shadow: 0 3px 12px rgba(0,0,0,0.25);
+    animation: swipeUp 1.2s ease-out 0.8s forwards;
   }
-  .loading-text-container span {
-    opacity: 0;
-    animation: letter-reveal 0.5s forwards;
-    display: inline-block;
+  @keyframes swipeUp {
+    0% { transform: translateY(0); opacity: 0; }
+    100% { transform: translateY(-95px); opacity: 1; }
   }
-  @keyframes letter-reveal {
-    to {
-      opacity: 1;
-    }
+  @keyframes load {
+    0% { width: 0%; }
+    100% { width: 100%; }
   }
-
   /* Search Results Page Styles */
   .search-results-page {
       padding: 150px 0 90px;
@@ -864,6 +874,7 @@ const AiSearchResultsPage = ({ query, result, onBack, isSearching }) => {
                     <strong>تنبيه:</strong> هذه المعلومات من الذكاء الاصطناعي وقد تحتوي الخطأ.
                   </div>
                 )}
+                {/* ✅ FIX START: Check if references is an array and has items */}
                 {result.source === 'database' && Array.isArray(result.references) && result.references.length > 0 && (
                   <div className="references-section">
                     <h3><i className="fas fa-book-open me-2"></i> المصدر الرئيسي</h3>
@@ -877,6 +888,7 @@ const AiSearchResultsPage = ({ query, result, onBack, isSearching }) => {
                     </ul>
                   </div>
                 )}
+                 {/* ✅ FIX END */}
               </div>
             ) : (
               <div className="no-results-card">
@@ -904,7 +916,6 @@ const CustomAlert = ({ message, show }) => {
 };
 export default function App() {
   const [loading, setLoading] = useState(true);
-  const [hidingLoader, setHidingLoader] = useState(false); // For fade-out animation
   const [page, setPage] = useState('home');
   const [query, setQuery] = useState('');
   const [aiSearchResult, setAiSearchResult] = useState(null);
@@ -918,13 +929,7 @@ export default function App() {
     fontAwesomeLink.rel = 'stylesheet';
     fontAwesomeLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css';
     document.head.appendChild(fontAwesomeLink);
-
-    // Improved loader timing
-    const timer = setTimeout(() => {
-        setHidingLoader(true); // Start fade-out animation
-        setTimeout(() => setLoading(false), 500); // Remove from DOM after animation
-    }, 2500);
-
+    const timer = setTimeout(() => setLoading(false), 2500);
     return () => clearTimeout(timer);
   }, []);
 
@@ -1009,9 +1014,8 @@ export default function App() {
   }, [isMenuOpen]);
 
   if (loading) {
-    const loadingText = "منصة صادق";
     return (
-      <div id="loading-screen" className={hidingLoader ? 'hidden' : ''} role="status" aria-live="polite" aria-label="شاشة تحميل محتوى الصفحة">
+      <div id="loading-screen" role="status" aria-live="polite" aria-label="شاشة تحميل محتمى الصفحة">
         <div className="loading-content">
           <div className="loading-logo">
             <svg width="170" height="170" viewBox="0 0 170 170" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1033,13 +1037,12 @@ export default function App() {
               </defs>
             </svg>
           </div>
-          <div className="loading-text-container" aria-label={loadingText}>
-            {loadingText.split('').map((char, index) => (
-                <span key={index} style={{ animationDelay: `${0.5 + index * 0.1}s` }}>
-                    {char === ' ' ? '\u00A0' : char}
-                </span>
-            ))}
+          <div className="progress-bar">
+            <div className="progress"></div>
           </div>
+          <span className="loading-text">
+            منصة صادق
+          </span>
         </div>
         <style>{`
           @keyframes dash {
