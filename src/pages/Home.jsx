@@ -1378,7 +1378,7 @@ export default function App() {
                 <a href="#" aria-label="قناة يوتيوب"><i className="fab fa-youtube"></i></a>
               </div>
               <p className="text-muted small">
-                <i className="fas fa-copyright me-1"></i> 2024 جميع الحقوق محفوظة - وزارة الصحة المصرية
+                <i className="fas fa-copyright me-1"></i> 2024 جميع الحقوق محفوظة - وزارة الاتصلات المصرية
               </p>
             </div>
           </div>
