@@ -1,7 +1,9 @@
+// src/components/NotFoundPage.js
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom'; // تأكد من تثبيت react-router-dom
 
+// تم تحديث الأنماط هنا
 const styles = {
     pageContainer: {
         display: 'flex',
@@ -9,10 +11,11 @@ const styles = {
         justifyContent: 'center',
         minHeight: '100vh',
         textAlign: 'center',
+        // استخدام تدرج لوني خفيف للخلفية
         background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
         fontFamily: "'Cairo', sans-serif",
         padding: '2rem',
-        overflow: 'hidden', 
+        overflow: 'hidden', // لمنع أي أشرطة تمرير غير مرغوب فيها
     },
     contentWrapper: {
         maxWidth: '600px',
@@ -20,8 +23,9 @@ const styles = {
     errorCode: {
         fontSize: 'clamp(8rem, 30vw, 15rem)',
         fontWeight: '900',
-        color: '#dee2e6', 
+        color: '#dee2e6', // لون أساسي فاتح
         position: 'relative',
+        // --- هذا هو كود التأثير ثلاثي الأبعاد (3D) ---
         textShadow: `
             1px 1px 1px #ced4da,
             2px 2px 1px #ced4da,
