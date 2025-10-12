@@ -13,6 +13,7 @@ import EditNews from './components/EditNews';
 import Reports from './components/Reports';
 import { isAuthenticated } from './auth';
 import Report from './pages/report';
+import NotFoundPage from './components/NotFoundPage'; // <-- استورد المكون الجديد
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
