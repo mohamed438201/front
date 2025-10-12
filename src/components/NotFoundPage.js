@@ -1,6 +1,6 @@
 // src/components/NotFoundPage.js
 
-import React, { useState } from 'react'; // <-- تم التعديل هنا
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 const styles = {
@@ -9,104 +9,93 @@ const styles = {
         alignItems: 'center',
         justifyContent: 'center',
         minHeight: '100vh',
-        textAlign: 'center',
-        background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+        backgroundColor: '#f0f4f8', // خلفية رمادية فاتحة وناعمة
         fontFamily: "'Cairo', sans-serif",
         padding: '2rem',
         overflow: 'hidden',
+        position: 'relative', // لإضافة الأشكال الرسومية
     },
     contentWrapper: {
-        maxWidth: '600px',
+        maxWidth: '550px',
+        textAlign: 'center',
+        zIndex: '2',
+        position: 'relative',
     },
     errorCode: {
-        fontSize: 'clamp(8rem, 30vw, 15rem)',
-        fontWeight: '900',
-        color: '#dee2e6',
-        position: 'relative',
-        textShadow: `
-            1px 1px 1px #ced4da,
-            2px 2px 1px #ced4da,
-            3px 3px 1px #adb5bd,
-            4px 4px 1px #adb5bd,
-            5px 5px 1px #9fa8b2,
-            6px 6px 1px #9fa8b2,
-            7px 7px 1px #8f9aaa,
-            8px 8px 10px rgba(0, 0, 0, 0.4)
-        `,
-        animation: 'float 4s ease-in-out infinite',
+        fontSize: 'clamp(8rem, 25vw, 12rem)',
+        fontWeight: '800',
+        lineHeight: '1',
+        // لون أزرق غامق جداً وأنيق
+        color: '#1e3c72',
+        marginBottom: '0.5rem',
     },
     title: {
-        fontSize: 'clamp(1.5rem, 5vw, 2.5rem)',
+        fontSize: 'clamp(1.75rem, 5vw, 2.5rem)',
         fontWeight: '700',
-        color: '#1e3c72',
-        marginTop: '-3.5rem',
-        position: 'relative',
-        zIndex: '1',
+        color: '#34495e', // لون نصي داكن وأقل حدة
+        marginBottom: '1rem',
     },
     description: {
-        fontSize: '1.15rem',
-        color: '#495057',
+        fontSize: '1.1rem',
+        color: '#7f8c8d', // لون رمادي ناعم
+        lineHeight: '1.8',
         marginBottom: '2.5rem',
-        maxWidth: '500px',
-        margin: '1.5rem auto 2.5rem auto',
     },
     homeButton: {
         display: 'inline-flex',
         alignItems: 'center',
         gap: '0.75rem',
-        padding: '0.8rem 2rem',
-        backgroundColor: '#1e3c72',
+        padding: '1rem 2.5rem',
+        backgroundColor: '#1e3c72', // نفس اللون الأزرق الغامق
         color: '#fff',
         textDecoration: 'none',
         borderRadius: '50px',
         fontWeight: '700',
         transition: 'all 0.3s ease',
-        boxShadow: '0 5px 20px -3px rgba(30, 60, 114, 0.4)',
+        boxShadow: '0 4px 15px rgba(30, 60, 114, 0.2)',
         border: 'none',
     },
+    // شكل رسومي مجرد للخلفية
+    backgroundShape: {
+        position: 'absolute',
+        borderRadius: '50%',
+        filter: 'blur(100px)',
+        zIndex: '1',
+    }
 };
-
-const PageStyles = () => (
-    <style>{`
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-            100% { transform: translateY(0px); }
-        }
-    `}</style>
-);
 
 const NotFoundPage = () => {
     const [isHovered, setIsHovered] = useState(false);
 
     const buttonStyle = {
         ...styles.homeButton,
-        transform: isHovered ? 'translateY(-5px) scale(1.05)' : 'translateY(0) scale(1)',
-        boxShadow: isHovered ? '0 8px 25px -5px rgba(30, 60, 114, 0.6)' : '0 5px 20px -3px rgba(30, 60, 114, 0.4)',
+        transform: isHovered ? 'translateY(-4px)' : 'translateY(0)',
+        boxShadow: isHovered ? '0 8px 25px rgba(30, 60, 114, 0.3)' : '0 4px 15px rgba(30, 60, 114, 0.2)',
     };
 
     return (
-        <>
-            <PageStyles />
-            <div style={styles.pageContainer}>
-                <div style={styles.contentWrapper}>
-                    <h1 style={styles.errorCode}>404</h1>
-                    <h2 style={styles.title}>عفواً، هذه الصفحة مفقودة</h2>
-                    <p style={styles.description}>
-                        يبدو أنك سلكت طريقًا غير متوقع. لا تقلق، يمكنك العودة إلى بر الأمان من هنا.
-                    </p>
-                    <Link
-                        to="/"
-                        style={buttonStyle}
-                        onMouseEnter={() => setIsHovered(true)}
-                        onMouseLeave={() => setIsHovered(false)}
-                    >
-                        <i className="fas fa-home"></i>
-                        العودة إلى الصفحة الرئيسية
-                    </Link>
-                </div>
+        <div style={styles.pageContainer}>
+            {/* الأشكال الرسومية في الخلفية */}
+            <div style={{ ...styles.backgroundShape, width: '400px', height: '400px', background: 'rgba(42, 82, 152, 0.1)', top: '10%', left: '10%' }}></div>
+            <div style={{ ...styles.backgroundShape, width: '300px', height: '300px', background: 'rgba(220, 53, 69, 0.05)', bottom: '15%', right: '15%' }}></div>
+            
+            <div style={styles.contentWrapper}>
+                <h1 style={styles.errorCode}>404</h1>
+                <h2 style={styles.title}>الصفحة غير موجودة</h2>
+                <p style={styles.description}>
+                    عفواً، لم نتمكن من العثور على الصفحة التي تبحث عنها. ربما تم حذفها أو أن الرابط الذي اتبعته غير صحيح.
+                </p>
+                <Link
+                    to="/"
+                    style={buttonStyle}
+                    onMouseEnter={() => setIsHovered(true)}
+                    onMouseLeave={() => setIsHovered(false)}
+                >
+                    <i className="fas fa-home"></i>
+                    العودة إلى الصفحة الرئيسية
+                </Link>
             </div>
-        </>
+        </div>
     );
 };
 
