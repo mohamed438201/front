@@ -1089,7 +1089,7 @@ const AboutPage = () => {
                 </div>
                 <div className="team-card-v2">
                     <div className="team-avatar"><i className="fas fa-user-gear"></i></div>
-                    <h4>م. سارة عبدالله</h4>
+                    <h4>محمد شريف محمد</h4>
                     <p className="team-role">مطورة رئيسية</p>
                 </div>
                 <div className="team-card-v2">
