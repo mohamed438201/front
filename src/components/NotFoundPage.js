@@ -1,9 +1,8 @@
 // src/components/NotFoundPage.js
 
-import React from 'react';
-import { Link } from 'react-router-dom'; // تأكد من تثبيت react-router-dom
+import React, { useState } from 'react'; // <-- تم التعديل هنا
+import { Link } from 'react-router-dom';
 
-// تم تحديث الأنماط هنا
 const styles = {
     pageContainer: {
         display: 'flex',
@@ -11,11 +10,10 @@ const styles = {
         justifyContent: 'center',
         minHeight: '100vh',
         textAlign: 'center',
-        // استخدام تدرج لوني خفيف للخلفية
         background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
         fontFamily: "'Cairo', sans-serif",
         padding: '2rem',
-        overflow: 'hidden', // لمنع أي أشرطة تمرير غير مرغوب فيها
+        overflow: 'hidden',
     },
     contentWrapper: {
         maxWidth: '600px',
@@ -23,9 +21,8 @@ const styles = {
     errorCode: {
         fontSize: 'clamp(8rem, 30vw, 15rem)',
         fontWeight: '900',
-        color: '#dee2e6', // لون أساسي فاتح
+        color: '#dee2e6',
         position: 'relative',
-        // --- هذا هو كود التأثير ثلاثي الأبعاد (3D) ---
         textShadow: `
             1px 1px 1px #ced4da,
             2px 2px 1px #ced4da,
@@ -41,9 +38,9 @@ const styles = {
     title: {
         fontSize: 'clamp(1.5rem, 5vw, 2.5rem)',
         fontWeight: '700',
-        color: '#1e3c72', // لون أزرق غامق متناسق
-        marginTop: '-3.5rem', // لزيادة التداخل مع الرقم
-        position: 'relative', // لضمان ظهوره فوق الرقم
+        color: '#1e3c72',
+        marginTop: '-3.5rem',
+        position: 'relative',
         zIndex: '1',
     },
     description: {
@@ -51,14 +48,13 @@ const styles = {
         color: '#495057',
         marginBottom: '2.5rem',
         maxWidth: '500px',
-        margin: '1.5rem auto 2.5rem auto', // لضمان التوسيط
+        margin: '1.5rem auto 2.5rem auto',
     },
     homeButton: {
         display: 'inline-flex',
         alignItems: 'center',
         gap: '0.75rem',
         padding: '0.8rem 2rem',
-        // --- هذا هو اللون الأزرق الغامق الجديد للزر ---
         backgroundColor: '#1e3c72',
         color: '#fff',
         textDecoration: 'none',
@@ -66,11 +62,10 @@ const styles = {
         fontWeight: '700',
         transition: 'all 0.3s ease',
         boxShadow: '0 5px 20px -3px rgba(30, 60, 114, 0.4)',
-        border: 'none', // إزالة أي حدود افتراضية
+        border: 'none',
     },
 };
 
-// مكون لإضافة الحركات (Animation)
 const PageStyles = () => (
     <style>{`
         @keyframes float {
@@ -81,12 +76,9 @@ const PageStyles = () => (
     `}</style>
 );
 
-
 const NotFoundPage = () => {
-    // حالة لإدارة تأثير التحويم على الزر
     const [isHovered, setIsHovered] = useState(false);
 
-    // دمج الأنماط الأساسية مع تأثير التحويم
     const buttonStyle = {
         ...styles.homeButton,
         transform: isHovered ? 'translateY(-5px) scale(1.05)' : 'translateY(0) scale(1)',
