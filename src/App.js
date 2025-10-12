@@ -38,7 +38,7 @@ const App = () => {
         <Route path="/add-news" element={<PrivateRoute><AddNews /></PrivateRoute>} />
         <Route path="/edit-news/:id" element={<PrivateRoute><EditNews /></PrivateRoute>} />
         <Route path="/reports" element={<PrivateRoute><Reports /></PrivateRoute>} />
-        <Route path="*" element={<Navigate to="/" />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Router>
   );
